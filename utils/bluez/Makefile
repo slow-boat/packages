@@ -36,7 +36,7 @@ $(call Package/bluez/Default)
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE+= library
-  DEPENDS:=+libpthread +USB_SUPPORT:kmod-bluetooth
+  DEPENDS:=+libpthread +kmod-bluetooth
 endef
 
 define Package/bluez-utils
