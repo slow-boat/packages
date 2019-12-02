@@ -1,6 +1,12 @@
 #!/bin/sh
 
 HCIATTACH=/usr/bin/hciattach
+
+if grep -q "SolidRun Cubox-i" /proc/device-tree/model; then
+	$HCIATTACH /dev/ttymxc3 bcm43xx 3000000 flow -
+	return
+fi
+
 if grep -q "Pi 4" /proc/device-tree/model; then
   BDADDR=
 else
