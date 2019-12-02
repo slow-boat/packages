@@ -61,6 +61,24 @@ define Package/mpd-full/conffiles
 /etc/mpd.conf
 endef
 
+define Package/mpd-jack
+$(call Package/mpd/Default)
+  TITLE+= (jack)
+  DEPENDS+= +libffmpeg +libid3tag +libvorbis +libmms +libupnp +libshout +jack +yajl +libsoxr
+  PROVIDES:=mpd
+  VARIANT:=jack
+endef
+
+define Package/mpd-jack/description
+$(call Package/mpd/Default/description)
+ .
+ This package contains a full-blown Music Player Daemon- with jack backend.
+endef
+
+define Package/mpd-jack/conffiles
+/etc/mpd.conf
+endef
+
 define Package/mpd-mini
 $(call Package/mpd/Default)
   TITLE+= (mini)
@@ -97,7 +115,7 @@ define Package/mpd-avahi-service/conffiles
 /etc/avahi/services/mpd.service
 endef
 
-EXTRA_LDFLAGS += $(if $(ICONV_FULL),-liconv,-Wl,--whole-archive -liconv -Wl,--no-whole-archive) -Wl,-rpath-link=$(STAGING_DIR)/usr/lib/pulseaudio
+EXTRA_LDFLAGS += $(if $(ICONV_FULL),-liconv,-Wl,--whole-archive -liconv -Wl,--no-whole-archive)
 
 MESON_ARGS += \
 	-Ddocumentation=false \
@@ -167,7 +185,7 @@ MESON_ARGS += \
 
 
 ifeq ($(BUILD_VARIANT),full)
-
+  EXTRA_LDFLAGS += -Wl,-rpath-link=$(STAGING_DIR)/usr/lib/pulseaudio
   MESON_ARGS += \
 	-Dupnp=enabled \
 	-Dmms=enabled \
@@ -185,8 +203,29 @@ ifeq ($(BUILD_VARIANT),full)
 	-Dyajl=enabled
 endif
 
-ifeq ($(BUILD_VARIANT),mini)
+ifeq ($(BUILD_VARIANT),jack)
 
+  MESON_ARGS += \
+	-Dupnp=enabled \
+	-Dmms=enabled \
+	-Dsoundcloud=enabled \
+	-Did3tag=enabled \
+	-Dffmpeg=enabled \
+	-Dmpg123=disabled \
+	-Dtremor=disabled \
+	-Dvorbis=enabled \
+	-Dfifo=true \
+	-Dpipe=true \
+	-Dpulse=disabled \
+	-Dsoxr=enabled \
+	-Djack=enabled \
+	-Drecorder=true \
+	-Dshout=enabled \
+	-Dyajl=enabled
+endif
+
+ifeq ($(BUILD_VARIANT),mini)
+  EXTRA_LDFLAGS += -Wl,-rpath-link=$(STAGING_DIR)/usr/lib/pulseaudio
   # oggflac is not compatible with tremor
   MESON_ARGS += \
 	-Dupnp=disabled \
@@ -218,6 +257,10 @@ define Package/mpd-full/install
 $(call Package/mpd/install,$1)
 endef
 
+define Package/mpd-jack/install
+$(call Package/mpd/install,$1)
+endef
+
 define Package/mpd-mini/install
 $(call Package/mpd/install,$1)
 endef
@@ -228,5 +271,6 @@ define Package/mpd-avahi-service/install
 endef
 
 $(eval $(call BuildPackage,mpd-full))
+$(eval $(call BuildPackage,mpd-jack))
 $(eval $(call BuildPackage,mpd-mini))
 $(eval $(call BuildPackage,mpd-avahi-service))
