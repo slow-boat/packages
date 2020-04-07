@@ -58,7 +58,7 @@ $(call Package/mpd/Default/description)
 endef
 
 define Package/mpd-full/conffiles
-/etc/mpd.conf
+/etc/mpd/mpd.conf
 endef
 
 define Package/mpd-jack
@@ -76,7 +76,7 @@ $(call Package/mpd/Default/description)
 endef
 
 define Package/mpd-jack/conffiles
-/etc/mpd.conf
+/etc/mpd/mpd.conf
 endef
 
 define Package/mpd-mini
@@ -95,7 +95,7 @@ $(call Package/mpd/Default/description)
 endef
 
 define Package/mpd-mini/conffiles
-/etc/mpd.conf
+/etc/mpd/mpd.conf
 endef
 
 define Package/mpd-avahi-service
@@ -247,10 +247,11 @@ endif
 define Package/mpd/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/mpd $(1)/usr/bin/
-	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/doc/mpdconf.example $(1)/etc/mpd.conf
+	$(INSTALL_DIR) $(1)/etc/mpd
+	$(INSTALL_CONF) ./files/mpd.conf $(1)/etc/mpd/mpd.conf
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/mpd.init $(1)/etc/init.d/mpd
+	$(INSTALL_DIR) $(1)/mnt/music
 endef
 
 define Package/mpd-full/install

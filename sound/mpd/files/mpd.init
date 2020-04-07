@@ -6,18 +6,16 @@ START=93
 USE_PROCD=1
 
 PROG=/usr/bin/mpd
-CONFIGFILE=/etc/mpd.conf
+CONFIGFILE=/etc/mpd/mpd.conf
 NICEPRIO=-10
 
-#TODO: Add uci config - nice, config
+boot() {
+    echo boot
+	mkdir -p "/etc/mpd/playlists"
+	mkdir -p "/var/run/mpd"
+}
 
 start_service() {
-	#create mpd directories from config
-	local pld=`grep ^playlist_directory "$CONFIGFILE" | cut -d "\"" -f 2 | sed "s/~/\/root/g"`
-	if [ ! -d $pld ]; then
-		mkdir -m 0755 -p $pld
-	fi
-
 	local lport=`grep ^port "$CONFIGFILE" | cut -d "\"" -f 2`
 	[ -z $lport ] && lport=6600
 
