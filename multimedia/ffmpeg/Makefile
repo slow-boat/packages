@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ffmpeg
-PKG_VERSION:=3.4.6
-PKG_RELEASE:=5
+PKG_VERSION:=3.4.7
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://ffmpeg.org/releases/
-PKG_HASH:=3572279cb139d9e39dcfbc23edf438ff5311ec3fc5d0dcb3558e49591e5cb83e
+PKG_HASH:=efd01782fd29b62505c973f5b61a65632d7b435dc9f4a6c97e92e6afd36cf5c8
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Ian Leonard <antonlacon@gmail.com>
 
@@ -374,7 +374,8 @@ $(call Package/libffmpeg/Default)
  DEPENDS+= +alsa-lib +PACKAGE_libopus:libopus \
     +SOFT_FLOAT:shine \
     +!SOFT_FLOAT:lame-lib \
-    +PACKAGE_libx264:libx264
+    +PACKAGE_libx264:libx264 \
+    +!PACKAGE_libx264:fdk-aac
  VARIANT:=full
 endef
 
@@ -482,12 +483,10 @@ ifeq ($(ARCH),x86_64)
 	FFMPEG_CONFIGURE+= --enable-lto
 endif
 
-ifneq ($(CONFIG_TARGET_x86),)
-ifeq ($(CONFIG_NASM),y)
+ifeq ($(CONFIG_FFMPEG_X86ASM),y)
   FFMPEG_CONFIGURE += --enable-x86asm
 else
   FFMPEG_CONFIGURE += --disable-x86asm
-endif
 endif
 
 ifeq ($(BUILD_VARIANT),full)

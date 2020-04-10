@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-requests
-PKG_VERSION:=2.22.0
+PKG_VERSION:=2.23.0
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Josef Schlehofer <josef.schlehofer@nic.cz>, Alexandru Ardelean <ardeleanalex@gmail.com>
@@ -17,11 +17,10 @@ PKG_LICENSE_FILES:=LICENSE
 PKG_CPE_ID:=cpe:/a:python-requests:requests
 
 PYPI_NAME:=requests
-PKG_HASH:=11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4
+PKG_HASH:=b3f43d496c6daba4493e7c431722aeb7dbc6288f52a6e04e7b6023b0247817e6
 
 include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
-include ../python-package.mk
 include ../python3-package.mk
 
 define Package/python-requests/Default
@@ -30,17 +29,6 @@ define Package/python-requests/Default
   CATEGORY:=Languages
   TITLE:=HTTP library for Python
   URL:=https://2.python-requests.org/
-endef
-
-define Package/python-requests
-$(call Package/python-requests/Default)
-  DEPENDS:= \
-	  +PACKAGE_python-requests:python \
-	  +PACKAGE_python-requests:python-chardet \
-	  +PACKAGE_python-requests:python-idna \
-	  +PACKAGE_python-requests:python-urllib3 \
-	  +PACKAGE_python-requests:python-certifi
-  VARIANT:=python
 endef
 
 define Package/python3-requests
@@ -54,19 +42,11 @@ $(call Package/python-requests/Default)
   VARIANT:=python3
 endef
 
-define Package/python-requests/description
-  Requests is the only Non-GMO HTTP library for Python, safe for human consumption
-endef
-
 define Package/python3-requests/description
-$(call Package/python-requests/description)
+  Requests is the only Non-GMO HTTP library for Python, safe for human consumption
 .
 (Variant for Python3)
 endef
-
-$(eval $(call PyPackage,python-requests))
-$(eval $(call BuildPackage,python-requests))
-$(eval $(call BuildPackage,python-requests-src))
 
 $(eval $(call Py3Package,python3-requests))
 $(eval $(call BuildPackage,python3-requests))

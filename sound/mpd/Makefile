@@ -6,12 +6,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mpd
-PKG_VERSION:=0.21.16
+PKG_VERSION:=0.21.22r1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=http://www.musicpd.org/download/mpd/0.21/
-PKG_HASH:=30cf1bddf7d7388487276745ad3515f134e07f0c57f9f97cb2b5d3befd4a4d92
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/MusicPlayerDaemon/MPD.git
+PKG_SOURCE_VERSION:=3c240e21197fb0e152e978f223df060e220ef989
 
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>
 PKG_LICENSE:=GPL-2.0-or-later
@@ -31,9 +32,9 @@ define Package/mpd/Default
   SECTION:=sound
   CATEGORY:=Sound
   TITLE:=Music Player Daemon
-  URL:=http://www.musicpd.org/
+  URL:=https://www.musicpd.org/
   DEPENDS:= +zlib +libcurl +libpthread +libmpdclient +libstdcpp $(ICONV_DEPENDS) \
-	    +AUDIO_SUPPORT:alsa-lib +boost +libexpat +libflac
+	    +AUDIO_SUPPORT:alsa-lib +boost +libexpat +libflac +libfaad2 +USE_UCLIBC:icu
 endef
 
 define Package/mpd/Default/description
@@ -82,7 +83,7 @@ endef
 define Package/mpd-mini
 $(call Package/mpd/Default)
   TITLE+= (mini)
-  DEPENDS+= +libmpg123 +libvorbisidec
+  DEPENDS+= +libmad +libvorbisidec
   PROVIDES:=mpd
   VARIANT:=mini
 endef
@@ -91,7 +92,7 @@ define Package/mpd-mini/description
 $(call Package/mpd/Default/description)
  .
  This package contains a minimal Music Player Daemon, with support for
- only Flac, MP3 & OGG media types & only file: & http: protocols.
+ only FLAC, AAC, MP3 & OGG media types & only file: & http: protocols.
 endef
 
 define Package/mpd-mini/conffiles
@@ -115,7 +116,9 @@ define Package/mpd-avahi-service/conffiles
 /etc/avahi/services/mpd.service
 endef
 
-EXTRA_LDFLAGS += $(if $(ICONV_FULL),-liconv,-Wl,--whole-archive -liconv -Wl,--no-whole-archive)
+TARGET_LDFLAGS += \
+	$(if $(ICONV_FULL),-liconv,-Wl,--whole-archive -liconv -Wl,--no-whole-archive) \
+	$(if $(CONFIG_USE_GLIBC),-lpthread)
 
 MESON_ARGS += \
 	-Ddocumentation=false \
@@ -146,11 +149,11 @@ MESON_ARGS += \
 	-Dchromaprint=disabled \
 	-Dadplug=disabled \
 	-Daudiofile=disabled \
-	-Dfaad=disabled \
+	-Dfaad=enabled \
 	-Dflac=enabled \
 	-Dfluidsynth=disabled \
 	-Dgme=disabled \
-	-Dmad=disabled \
+	-Dmpg123=disabled \
 	-Dmikmod=disabled \
 	-Dmodplug=disabled \
 	-Dmpcdec=disabled \
@@ -176,13 +179,12 @@ MESON_ARGS += \
 	-Dsolaris_output=disabled \
 	-Ddbus=disabled \
 	-Dexpat=enabled \
-	-Dicu=disabled \
-	-Diconv=enabled \
+	-Dicu=$(if $(CONFIG_USE_UCLIBC),enabled,disabled) \
+	-Diconv=$(if $(CONFIG_USE_UCLIBC),disabled,enabled) \
 	-Dpcre=disabled \
 	-Dsqlite=disabled \
 	-Dzlib=enabled \
 	-Dzeroconf=disabled
-
 
 ifeq ($(BUILD_VARIANT),full)
   EXTRA_LDFLAGS += -Wl,-rpath-link=$(STAGING_DIR)/usr/lib/pulseaudio
@@ -192,7 +194,7 @@ ifeq ($(BUILD_VARIANT),full)
 	-Dsoundcloud=enabled \
 	-Did3tag=enabled \
 	-Dffmpeg=enabled \
-	-Dmpg123=disabled \
+	-Dmad=disabled \
 	-Dtremor=disabled \
 	-Dvorbis=enabled \
 	-Dfifo=true \
@@ -204,14 +206,13 @@ ifeq ($(BUILD_VARIANT),full)
 endif
 
 ifeq ($(BUILD_VARIANT),jack)
-
   MESON_ARGS += \
 	-Dupnp=enabled \
 	-Dmms=enabled \
 	-Dsoundcloud=enabled \
 	-Did3tag=enabled \
 	-Dffmpeg=enabled \
-	-Dmpg123=disabled \
+	-Dmad=disabled \
 	-Dtremor=disabled \
 	-Dvorbis=enabled \
 	-Dfifo=true \
@@ -233,7 +234,7 @@ ifeq ($(BUILD_VARIANT),mini)
 	-Dsoundcloud=disabled \
 	-Did3tag=disabled \
 	-Dffmpeg=disabled \
-	-Dmpg123=enabled \
+	-Dmad=enabled \
 	-Dtremor=enabled \
 	-Dvorbis=disabled \
 	-Dfifo=false \

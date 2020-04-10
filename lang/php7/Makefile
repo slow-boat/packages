@@ -6,7 +6,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=php
-PKG_VERSION:=7.4.1
+PKG_VERSION:=7.4.4
 PKG_RELEASE:=1
 
 PKG_MAINTAINER:=Michael Heimpold <mhei@heimpold.de>
@@ -16,7 +16,7 @@ PKG_CPE_ID:=cpe:/a:php:php
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=http://www.php.net/distributions/
-PKG_HASH:=561bb866bdd509094be00f4ece7c3543ec971c4d878645ee81437e291cffc762
+PKG_HASH:=1873c4cefdd3df9a78dcffb2198bba5c2f0464f55c9c960720c84df483fca74c
 
 PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
@@ -597,7 +597,7 @@ $(eval $(call BuildModule,exif,EXIF))
 $(eval $(call BuildModule,fileinfo,Fileinfo))
 $(eval $(call BuildModule,filter,Filter))
 $(eval $(call BuildModule,ftp,FTP,+PACKAGE_php7-mod-ftp:libopenssl))
-$(eval $(call BuildModule,gd,GD graphics,+PACKAGE_php7-mod-gd:libgd))
+$(eval $(call BuildModule,gd,GD graphics,+PACKAGE_php7-mod-gd:libgd-full))
 $(eval $(call BuildModule,gettext,Gettext,+PACKAGE_php7-mod-gettext:libintl-full))
 $(eval $(call BuildModule,gmp,GMP,+PACKAGE_php7-mod-gmp:libgmp))
 $(eval $(call BuildModule,iconv,iConv,$(ICONV_DEPENDS)))
@@ -607,7 +607,7 @@ $(eval $(call BuildModule,json,JSON))
 $(eval $(call BuildModule,ldap,LDAP,+PACKAGE_php7-mod-ldap:libopenldap +PACKAGE_php7-mod-ldap:libsasl2))
 $(eval $(call BuildModule,mbstring,MBString,+PACKAGE_php7-mod-mbstring:oniguruma))
 $(eval $(call BuildModule,mysqli,MySQL Improved Extension,+PACKAGE_php7-mod-mysqli:php7-mod-mysqlnd,30))
-$(eval $(call BuildModule,mysqlnd,MySQL Native Driver))
+$(eval $(call BuildModule,mysqlnd,MySQL Native Driver,+PACKAGE_php7-mod-openssl:php7-mod-openssl))
 $(eval $(call BuildModule,opcache,OPcache,,,zend))
 $(eval $(call BuildModule,openssl,OpenSSL,+PACKAGE_php7-mod-openssl:libopenssl,15))
 $(eval $(call BuildModule,pcntl,PCNTL))

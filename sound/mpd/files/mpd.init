@@ -16,13 +16,18 @@ boot() {
 }
 
 start_service() {
-	local lport=`grep ^port "$CONFIGFILE" | cut -d "\"" -f 2`
-	[ -z $lport ] && lport=6600
+	lport=$(grep ^port "$CONFIGFILE" | cut -d "\"" -f 2)
+	[ -z "$lport" ] && lport=6600
 
 	procd_open_instance
 	procd_add_mdns "mpd" "tcp" "$lport"
 	procd_set_param command "$PROG" --no-daemon "$CONFIGFILE"
+	procd_set_param stderr 1
 	# Give MPD some real-time priority
 	procd_set_param nice "$NICEPRIO"
 	procd_close_instance
+}
+
+reload_service() {
+	procd_send_signal "$PROG"
 }

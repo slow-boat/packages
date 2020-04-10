@@ -6,7 +6,6 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=radicale2
 PKG_VERSION:=2.1.11
 PKG_RELEASE:=1
-PKG_MAINTAINER:=Daniel Dickinson <cshored@thecshore.com>
 
 PKG_LICENSE:=GPL-3.0
 PKG_LICENSE_FILES:=COPYING
@@ -25,7 +24,6 @@ define Package/radicale2/Default
   SUBMENU:=Web Servers/Proxies
   URL:=http://radicale.org/
   TITLE:=Radicale 2.x CalDAV/CardDAV server
-  MAINTAINER:=Daniel Dickinson <cshored@thecshore.com>
 endef
 
 define Package/radicale2
@@ -49,8 +47,14 @@ endef
 
 define Package/radicale2/description
 $(call Package/radicale2-meta/description)
-.
+
 This package contains the python files.
+
+Note that md5 encryption of passwords requires passlib, and
+bcrypt encryption requires passlib + bcrypt.  These are not
+added as hard dependencies as users may be running radicale2
+with a web server doing the authentication instead of radicale2.
+
 endef
 
 define Package/radicale2-examples/description

@@ -7,14 +7,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nss
-PKG_VERSION:=3.48
-PKG_RELEASE:=2
+PKG_VERSION:=3.51
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:= \
     https://download.cdn.mozilla.net/pub/security/$(PKG_NAME)/releases/NSS_$(subst .,_,$(PKG_VERSION))_RTM/src \
     https://archive.mozilla.org/pub/security/$(PKG_NAME)/releases/NSS_$(subst .,_,$(PKG_VERSION))_RTM/src
-PKG_HASH:=3f9c822a86a4e3e1bfe63e2ed0f922d8b7c2e0b7cafe36774b1c627970d0f8ac
+PKG_HASH:=75348b3b3229362486c57a880db917da1f96ef4eb639dc9cc2ff17d72268459c
 
 PKG_MAINTAINER:=Lucian Cristian <lucian.cristian@gmail.com>
 PKG_LICENCE:=MPL-2.0
