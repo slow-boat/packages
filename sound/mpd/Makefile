@@ -261,6 +261,8 @@ endef
 
 define Package/mpd-jack/install
 $(call Package/mpd/install,$1)
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) ./files/mpdvol.service $(1)/usr/sbin/mpdvol
 endef
 
 define Package/mpd-mini/install

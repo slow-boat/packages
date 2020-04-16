@@ -1,0 +1,15 @@
+#!/bin/sh
+
+mixername="SoftMaster"
+
+curvol(){ echo "$1" | grep -m1 '%' | awk -F'[' '{print$2}' | awk -F'%' '{print $1}'; }
+
+cur=`curvol "$(amixer sget $mixername)"`
+sleep 3
+mpc idleloop mixer | while read line; do
+	val=`mpc status | grep volume | awk -F': ' '{print $2}' | awk -F'%' '{print $1}'`
+	echo "step $((val-cur))%"
+	val=$((val*255/100))
+	res=`amixer sset $mixername $val` || exit 0
+	cur=`curvol "$res"`
+done
