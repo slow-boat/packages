@@ -1,15 +1,23 @@
 #!/bin/sh
+exec 1>>/tmp/sound.log
+exec 2>&1
 
-mixername="SoftMaster"
+MIXERNAME="SoftMaster"
 
 curvol(){ echo "$1" | grep -m1 '%' | awk -F'[' '{print$2}' | awk -F'%' '{print $1}'; }
 
-cur=`curvol "$(amixer sget $mixername)"`
+echo "`date` starting mpd volume sync monitor"
+# wait a bit for mpd to start
 sleep 3
+
+# now sync the mpd volume to the amixer setting
+cur=`curvol "$(amixer sget $MIXERNAME)"`
+echo "Setting mpd volume to ${cur}%"
+mpc volume $cur
 mpc idleloop mixer | while read line; do
 	val=`mpc status | grep volume | awk -F': ' '{print $2}' | awk -F'%' '{print $1}'`
 	echo "step $((val-cur))%"
 	val=$((val*255/100))
-	res=`amixer sset $mixername $val` || exit 0
+	res=`amixer sset $MIXERNAME $val` || exit 0
 	cur=`curvol "$res"`
 done
