@@ -7,7 +7,11 @@ USE_PROCD=1
 
 PROG=/usr/bin/mpd
 CONFIGFILE=/etc/mpd/mpd.conf
-NICEPRIO=-10
+
+# since we are using jackd, this sets the priority of appropriate threads
+# and on loaded systems, the mpd clients then do not hijack too much cpu
+# which can cause drops
+#NICEPRIO=-14
 
 boot() {
     echo boot
@@ -24,7 +28,7 @@ start_service() {
 	procd_set_param command "$PROG" --no-daemon "$CONFIGFILE"
 	procd_set_param stderr 1
 	# Give MPD some real-time priority
-	procd_set_param nice "$NICEPRIO"
+	[ -z "$NICEPRIO" ] || procd_set_param nice "$NICEPRIO"
 	procd_close_instance
 	
 	procd_open_instance
