@@ -1,0 +1,13 @@
+Index: libftdi1-1.4/ftdi_eeprom/main.c
+===================================================================
+--- libftdi1-1.4.orig/ftdi_eeprom/main.c
++++ libftdi1-1.4/ftdi_eeprom/main.c
+@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
+ 
+     if (command == COMMAND_READ)
+     {
+-        ftdi_eeprom_decode(ftdi, 0 /* debug: 1 */);
++        ftdi_eeprom_decode(ftdi, 1 /* debug: 1 */);
+ 
+         eeprom_buf = malloc(my_eeprom_size);
+         ftdi_get_eeprom_buf(ftdi, eeprom_buf, my_eeprom_size);

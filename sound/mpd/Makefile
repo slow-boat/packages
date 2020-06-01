@@ -6,13 +6,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=mpd
-PKG_VERSION:=0.21.22r1
-PKG_RELEASE:=1
+PKG_VERSION:=0.21.23
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/MusicPlayerDaemon/MPD.git
-PKG_SOURCE_VERSION:=3c240e21197fb0e152e978f223df060e220ef989
+PKG_SOURCE_URL:=https://www.musicpd.org/download/mpd/0.21/
+PKG_HASH:=439f522ca9800f375e4fb459ec31e61b3d824fc5c0580ff06dac48b5d21207a3
 
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>
 PKG_LICENSE:=GPL-2.0-or-later
@@ -34,7 +33,7 @@ define Package/mpd/Default
   TITLE:=Music Player Daemon
   URL:=https://www.musicpd.org/
   DEPENDS:= +zlib +libcurl +libpthread +libmpdclient +libstdcpp $(ICONV_DEPENDS) \
-	    +AUDIO_SUPPORT:alsa-lib +boost +libexpat +libflac +libfaad2 +USE_UCLIBC:icu
+	    +AUDIO_SUPPORT:alsa-lib +boost +libexpat +libflac +libid3tag +libfaad2 +USE_UCLIBC:icu
 endef
 
 define Package/mpd/Default/description
@@ -47,7 +46,7 @@ endef
 define Package/mpd-full
 $(call Package/mpd/Default)
   TITLE+= (full)
-  DEPENDS+= +libffmpeg +libid3tag +libvorbis +libmms +libupnp +libshout +pulseaudio-daemon +yajl
+  DEPENDS+= +libffmpeg +libvorbis +libmms +libupnp +libshout +pulseaudio-daemon +yajl
   PROVIDES:=mpd
   VARIANT:=full
 endef
@@ -65,7 +64,7 @@ endef
 define Package/mpd-jack
 $(call Package/mpd/Default)
   TITLE+= (jack)
-  DEPENDS+= +libffmpeg +libid3tag +libvorbis +libmms +libupnp +libshout +jack +yajl +libsoxr
+  DEPENDS+= +libffmpeg +libvorbis +libmms +libupnp +libshout +jack +yajl +libsoxr
   PROVIDES:=mpd
   VARIANT:=jack
 endef
@@ -146,6 +145,7 @@ MESON_ARGS += \
 	-Dbzip2=disabled \
 	-Diso9660=disabled \
 	-Dzzip=disabled \
+	-Did3tag=enabled \
 	-Dchromaprint=disabled \
 	-Dadplug=disabled \
 	-Daudiofile=disabled \
@@ -186,13 +186,13 @@ MESON_ARGS += \
 	-Dzlib=enabled \
 	-Dzeroconf=disabled
 
+
 ifeq ($(BUILD_VARIANT),full)
   EXTRA_LDFLAGS += -Wl,-rpath-link=$(STAGING_DIR)/usr/lib/pulseaudio
   MESON_ARGS += \
 	-Dupnp=enabled \
 	-Dmms=enabled \
 	-Dsoundcloud=enabled \
-	-Did3tag=enabled \
 	-Dffmpeg=enabled \
 	-Dmad=disabled \
 	-Dtremor=disabled \
@@ -207,20 +207,19 @@ endif
 
 ifeq ($(BUILD_VARIANT),jack)
   MESON_ARGS += \
-	-Dupnp=enabled \
-	-Dmms=enabled \
+	-Dupnp=disabled \
+	-Dmms=disabled \
 	-Dsoundcloud=enabled \
-	-Did3tag=enabled \
 	-Dffmpeg=enabled \
 	-Dmad=disabled \
 	-Dtremor=disabled \
 	-Dvorbis=enabled \
-	-Dfifo=true \
-	-Dpipe=true \
+	-Dfifo=false \
+	-Dpipe=false \
 	-Dpulse=disabled \
 	-Dsoxr=enabled \
 	-Djack=enabled \
-	-Drecorder=true \
+	-Drecorder=false \
 	-Dshout=enabled \
 	-Dyajl=enabled
 endif

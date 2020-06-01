@@ -27,6 +27,7 @@ start_service() {
 	procd_add_mdns "mpd" "tcp" "$lport"
 	procd_set_param command "$PROG" --no-daemon "$CONFIGFILE"
 	procd_set_param stderr 1
+	# procd_set_param limits core=unlimited
 	# Give MPD some real-time priority
 	[ -z "$NICEPRIO" ] || procd_set_param nice "$NICEPRIO"
 	procd_close_instance

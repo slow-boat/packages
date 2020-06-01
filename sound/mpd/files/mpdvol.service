@@ -12,12 +12,18 @@ sleep 3
 
 # now sync the mpd volume to the amixer setting
 cur=`curvol "$(amixer sget $MIXERNAME)"`
+cur=`printf "%d" $cur 2>/dev/null` || cur=30
 echo "Setting mpd volume to ${cur}%"
 mpc volume $cur
 mpc idleloop mixer | while read line; do
 	val=`mpc status | grep volume | awk -F': ' '{print $2}' | awk -F'%' '{print $1}'`
+	val=`printf "%d" $val 2>/dev/null` || {
+		echo "Setting mpd volume: warning: no value from mpc"
+		continue
+	}
 	echo "step $((val-cur))%"
 	val=$((val*255/100))
 	res=`amixer sset $MIXERNAME $val` || exit 0
-	cur=`curvol "$res"`
+	newcur=`curvol "$res"`
+	newcur=`printf "%d" $newcur 2>/dev/null` && cur=$newcur
 done
