@@ -11,11 +11,12 @@ CONFIGFILE=/etc/mpd/mpd.conf
 # since we are using jackd, this sets the priority of appropriate threads
 # and on loaded systems, the mpd clients then do not hijack too much cpu
 # which can cause drops
-#NICEPRIO=-14
+NICEPRIO=-5
 
 boot() {
     echo boot
 	mkdir -p "/etc/mpd/playlists"
+	mkdir -p "/etc/mpd/database"
 	mkdir -p "/var/run/mpd"
 }
 
