@@ -14,9 +14,6 @@ CONFIGFILE=/etc/mpd/mpd.conf
 NICEPRIO=-5
 
 boot() {
-    echo boot
-	mkdir -p "/etc/mpd/playlists"
-	mkdir -p "/etc/mpd/database"
 	mkdir -p "/var/run/mpd"
 }
 
