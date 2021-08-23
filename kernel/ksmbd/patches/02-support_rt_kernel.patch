@@ -1,0 +1,34 @@
+Index: ksmbd-3.3.9/buffer_pool.c
+===================================================================
+--- ksmbd-3.3.9.orig/buffer_pool.c
++++ ksmbd-3.3.9/buffer_pool.c
+@@ -9,7 +9,11 @@
+ #include <linux/mm.h>
+ #include <linux/slab.h>
+ #include <linux/vmalloc.h>
+-#include <linux/rwlock.h>
++#if __has_include(<linux/rwlock_rt.h>)
++	#include <linux/rwlock_rt.h>
++#else
++	#include <linux/rwlock.h>
++#endif
+ 
+ #include "glob.h"
+ #include "buffer_pool.h"
+Index: ksmbd-3.3.9/transport_rdma.c
+===================================================================
+--- ksmbd-3.3.9.orig/transport_rdma.c
++++ ksmbd-3.3.9/transport_rdma.c
+@@ -20,7 +20,11 @@
+ #define SUBMOD_NAME	"smb_direct"
+ 
+ #include <linux/kthread.h>
+-#include <linux/rwlock.h>
++#if __has_include(<linux/rwlock_rt.h>)
++	#include <linux/rwlock_rt.h>
++#else
++	#include <linux/rwlock.h>
++#endif
+ #include <linux/list.h>
+ #include <linux/mempool.h>
+ #include <linux/highmem.h>
