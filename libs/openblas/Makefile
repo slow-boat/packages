@@ -5,12 +5,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=OpenBLAS
-PKG_VERSION:=0.3.17
+PKG_VERSION:=0.3.18
 PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=OpenBLAS-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/xianyi/OpenBLAS/releases/download/v$(PKG_VERSION)/
-PKG_HASH:=df2934fa33d04fd84d839ca698280df55c690c86a5a1133b3f7266fce1de279f
+PKG_HASH:=1632c1e8cca62d8bed064b37747e331a1796fc46f688626337362bf0d16aeadb
 PKG_LICENSE:=BSD 3-Clause
 PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>
 
@@ -47,26 +47,26 @@ endmenu
 endef
 
 OPENBLAS_TARGET=$(call qstrip,$(CONFIG_OPENBLAS_TARGET_OVERRIDE))
+CPU_TYPE=$(call qstrip,$(CONFIG_CPU_TYPE))
 
 ifeq ($(OPENBLAS_TARGET),)
+# initialize to GENERIC as default
+OPENBLAS_TARGET:=GENERIC
+
 ifeq ($(ARCH),aarch64)
   OPENBLAS_TARGET:=ARMV8
 else ifeq ($(ARCH),arm)
   OPENBLAS_TARGET:=ARMV5
 else ifeq ($(ARCH),mips)
-  OPENBLAS_TARGET:=MIPS24K
+  ifneq ($(filter 24k% 74k%,$(CPU_TYPE)),)
+    OPENBLAS_TARGET:=MIPS24K
+  endif # CPU_TYPE == 24k* or 74k*
 else ifeq ($(ARCH),mipsel)
-  OPENBLAS_TARGET:=MIPS24K
+  ifneq ($(filter 24k% 74k%,$(CPU_TYPE)),)
+    OPENBLAS_TARGET:=MIPS24K
+  endif # CPU_TYPE == 24k* or 74k*
 else ifeq ($(ARCH),powerpc)
   OPENBLAS_TARGET:=PPC440
-else ifeq ($(ARCH),mips64)
-  OPENBLAS_TARGET:=I6400
-else ifeq ($(ARCH),mips64el)
-  OPENBLAS_TARGET:=I6400
-else ifeq ($(ARCH),i386)
-  OPENBLAS_TARGET:=GENERIC
-else ifeq ($(ARCH),x86_64)
-  OPENBLAS_TARGET:=GENERIC
 endif
 endif # ifeq ($(OPENBLAS_TARGET),)
 
@@ -81,6 +81,7 @@ MAKE_FLAGS += \
 	HOSTCC=$(HOSTCC_NOCACHE) \
 	CROSS_SUFFIX=$(TARGET_CROSS) \
 	BINARY=$(OPENBLAS_BINARY) \
+	MAKE_NB_JOBS=-1 \
 	NUM_THREADS=2 \
 	PREFIX=/usr \
 	COMMON_OPT="" \
