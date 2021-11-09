@@ -1,0 +1,12 @@
+Index: openssh-8.8p1/sshd_config
+===================================================================
+--- openssh-8.8p1.orig/sshd_config
++++ openssh-8.8p1/sshd_config
+@@ -30,6 +30,7 @@
+ 
+ #LoginGraceTime 2m
+ #PermitRootLogin prohibit-password
++PermitRootLogin yes
+ #StrictModes yes
+ #MaxAuthTries 6
+ #MaxSessions 10

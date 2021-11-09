@@ -1,5 +1,7 @@
---- a/glob.h
-+++ b/glob.h
+Index: ksmbd-3.4.2/glob.h
+===================================================================
+--- ksmbd-3.4.2.orig/glob.h
++++ ksmbd-3.4.2/glob.h
 @@ -7,6 +7,8 @@
  #ifndef __KSMBD_GLOB_H
  #define __KSMBD_GLOB_H
