@@ -34,21 +34,30 @@ minidlna_cfg_add_media_dir() {
 	echo "media_dir=$val"
 }
 
+append_device_name() {
+	local device 
+	network_get_device device "$1" || device="$1"
+	[ -z "$interfaces" ] && interfaces="$device" || interfaces="$interfaces,$device"
+}
+
 minidlna_create_config() {
 	local cfg=$1
 	local port
 	local interface
+	local interfaces
 
 	config_get port "$cfg" port
-	config_get interface "$cfg" interface
+	[ -t "$port" ] && return 1
 
-	{ [ -z "$interface" ] || [ -t "$port" ]; } && return 1
+	. /lib/functions/network.sh
+	config_list_foreach "$cfg" interface append_device_name
+	[ -z "$interfaces" ] && interfaces="lan"
 
 	mkdir -p /var/etc
 	echo "# this file is generated automatically, don't edit"
 
 	echo "port=$port"
-	echo "network_interface=$interface"
+	echo "network_interface=$interfaces"
 
 	minidlna_cfg_addstr "$cfg" friendly_name
 	minidlna_cfg_addstr "$cfg" user
