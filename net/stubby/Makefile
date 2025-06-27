@@ -5,20 +5,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=stubby
-PKG_VERSION:=0.3.0
-PKG_RELEASE:=1
+PKG_VERSION:=0.4.3
+PKG_RELEASE:=2
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/getdnsapi/$(PKG_NAME)
 PKG_SOURCE_VERSION:=v$(PKG_VERSION)
-PKG_MIRROR_HASH:=f1585aa6881bf39c2c8f99df045d5739bb78403417a1e827644cb202fa4280f0
+PKG_MIRROR_HASH:=9869d14a9f0a311b6a52b47392fe7d4616b149ee88b2b6ab6ce99f09591b4529
 
-PKG_MAINTAINER:=Jonathan Underwood <jonathan.underwood@gmail.com>
+PKG_MAINTAINER:=
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=COPYING
-
-CMAKE_INSTALL:=1
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -47,6 +44,9 @@ define Package/stubby/conffiles
 /etc/stubby/stubby.yml
 /etc/config/stubby
 endef
+
+# Disable static linking
+CMAKE_OPTIONS += -DENABLE_GETDNS_STATIC_LINK=OFF
 
 define Package/stubby/install
 	$(INSTALL_DIR) $(1)/usr/sbin

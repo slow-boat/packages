@@ -8,28 +8,26 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=freetype
-PKG_VERSION:=2.10.4
-PKG_RELEASE:=2
+PKG_VERSION:=2.13.3
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@SF/freetype
-PKG_HASH:=86a854d8905b19698bbc8f23b860bc104246ce4854dcea8e3b0fb21284f75784
+PKG_HASH:=0550350666d427c74daeb85d5ac7bb353acba5f76956395995311a9c6f063289
 
 PKG_MAINTAINER:=Val Kulkov <val.kulkov@gmail.com>
 PKG_LICENSE:=FTL GPL-2.0-only MIT ZLIB GPL-3.0-or-later
-PKG_LICENSE_FILES:=docs/LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT src/bdf/README src/pcf/README src/gzip/zlib.h builds/unix/config.sub builds/unix/config.guess builds/unix/libtool 
-PKG_CPE_ID:=cpe:/a:freetype:freetype2
-
-PKG_BUILD_DEPENDS:=meson/host
+PKG_LICENSE_FILES:=LICENSE.TXT docs/FTL.TXT docs/GPLv2.TXT src/bdf/README src/pcf/README src/gzip/zlib.h builds/unix/config.sub builds/unix/config.guess
+PKG_CPE_ID:=cpe:/a:freetype:freetype
 
 include $(INCLUDE_DIR)/package.mk
-include ../../devel/meson/meson.mk
+include $(INCLUDE_DIR)/meson.mk
 
 define Package/libfreetype
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=A free, high-quality and portable font engine
-  URL:=http://www.freetype.org/
+  URL:=https://www.freetype.org/
   DEPENDS:=+zlib +libpng
 endef
 
@@ -41,7 +39,7 @@ define Package/libfreetype/description
 endef
 
 MESON_ARGS += \
-	-Dzlib=system \
+	-Dzlib=enabled \
 	-Dbzip2=disabled \
 	-Dpng=enabled \
 	-Dharfbuzz=disabled \
@@ -52,7 +50,7 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/freetype2
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/freetype2/* $(1)/usr/include/freetype2/
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfreetype.{a,so}* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libfreetype.so* $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/freetype2.pc $(1)/usr/lib/pkgconfig/freetype2.pc
 endef

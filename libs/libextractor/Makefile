@@ -6,24 +6,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libextractor
-PKG_VERSION:=1.10
-PKG_RELEASE:=3
+PKG_VERSION:=1.13
+PKG_RELEASE:=1
 
 # ToDo:
 # - package missing optional dependencies: libexiv2, gsf, librpm, smf, tidy
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/$(PKG_NAME)
-PKG_HASH:=9eed11b5ddc7c929ba112c50de8cfaa379f1d99a0c8e064101775837cf432357
+PKG_HASH:=bb8f312c51d202572243f113c6b62d8210301ab30cbaee604f9837d878cdf755
 
 PKG_LICENSE:=GPL-3.0-or-later
 PKG_LICENSE_FILES:=COPYING
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 PKG_CONFIG_DEPENDS:= \
-	CONFIG_PACKAGE_libextractor-plugin-thumbnailffmpeg \
 	CONFIG_PACKAGE_libextractor-plugin-gstreamer
 
 PLUGINS:= \
@@ -47,7 +47,6 @@ PLUGINS:= \
 	riff \
 	s3m \
 	sid \
-	thumbnailffmpeg:+libffmpeg-full:+libmagic:@BUILD_PATENTED \
 	tiff:+libtiff \
 	wav \
 	xm \
@@ -58,17 +57,10 @@ include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
 
 CONFIGURE_ARGS += \
-	--$(if $(CONFIG_PACKAGE_libextractor-plugin-thumbnailffmpeg),en,dis)able-ffmpeg \
 	--disable-glibtest \
 	--disable-gsf \
 	--disable-rpath \
 	--with$(if $(CONFIG_PACKAGE_libextractor-plugin-gstreamer),,out)-gstreamer
-
-CONFIGURE_VARS += \
-	ac_cv_lib_jpeg_jpeg_mem_src=yes
-
-TARGET_LDFLAGS += \
-	-liconv
 
 define Package/libextractor
 	SECTION:=libs

@@ -3,19 +3,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cJSON
-PKG_VERSION:=1.7.14
-PKG_RELEASE:=3
+PKG_VERSION:=1.7.18
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/DaveGamble/cJSON/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=fb50a663eefdc76bafa80c82bc045af13b1363e8f45cec8b442007aef6a41343
+PKG_HASH:=3aa806844a03442c00769b83e99970be70fbef03735ff898f4811dd03b9f5ee5
 
 PKG_MAINTAINER:=Karl Palsson <karlp@etactica.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 PKG_CPE_ID:=cpe:/a:cjson_project:cjson
-
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk

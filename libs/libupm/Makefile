@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libupm
 PKG_VERSION:=2.0.0
-PKG_RELEASE:=4
+PKG_RELEASE:=7
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/intel-iot-devkit/upm/tar.gz/v$(PKG_VERSION)?
@@ -22,8 +22,7 @@ PKG_LICENSE_FILES:=LICENSE
 
 CMAKE_INSTALL:=1
 CMAKE_BINARY_SUBDIR:=build
-PKG_USE_MIPS16:=0
-PKG_BUILD_PARALLEL:=1
+PKG_BUILD_FLAGS:=no-mips16
 PYTHON3_PKG_BUILD:=0
 
 include $(INCLUDE_DIR)/package.mk
@@ -53,7 +52,9 @@ UPM_MODULES:= \
 # (require libbacnet) tb7300 t8100 e50hx bacnetmstp
 # (require libtinyb) 2jciebu01_ble 2jciebu01_usb
 
-CMAKE_OPTIONS=-DBUILDSWIGNODE=$(if $(CONFIG_PACKAGE_libmraa-node),ON,OFF) \
+CMAKE_OPTIONS += \
+	-DBUILDSWIGNODE=OFF \
+	-DWERROR=OFF \
 	-DPYTHON2LIBS_FOUND=FALSE \
 	-DPYTHON2INTERP_FOUND=FALSE \
 
@@ -78,7 +79,6 @@ define Package/libupm
   TITLE:=Intel IoT sensor library - Full
   DEPENDS+=+libjpeg +libmodbus +openzwave
   DEPENDS+= $(foreach module, $(UPM_MODULES), +libupm-$(module))
-  DEPENDS+= $(foreach module, $(UPM_MODULES), +libupm-$(module)-node)
   DEPENDS+= $(foreach module, $(UPM_MODULES), +libupm-$(module)-python3)
 endef
 
@@ -93,11 +93,6 @@ define Package/libupm/install/Default
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libupm*-$(2).so* $(1)/usr/lib/ ;
 endef
 
-define Package/libupm/install/Default-node
-	$(INSTALL_DIR) $(1)/usr/lib/node/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/node_modules/jsupm_$(2) $(1)/usr/lib/node/ ;
-endef
-
 define Package/libupm/install/Default-python3
 	$(INSTALL_DIR) $(1)/usr/lib/python$(PYTHON3_VERSION)/site-packages/upm
 	$(CP) $(CMAKE_BINARY_DIR)/$(if $(filter interfaces, $(2)),,src/)$(2)/python$(PYTHON3_VERSION)/pyupm_$(2).py \
@@ -109,7 +104,6 @@ endef
 define Package/libupm/install
 	$(foreach module, $(UPM_MODULES), \
 		$(call Package/libupm/install/Default,$(1),$(module)) \
-		$(call Package/libupm/install/Default-node,$(1),$(module)) \
 		$(call Package/libupm/install/Default-python3,$(1),$(module)))
 endef
 
@@ -345,19 +339,6 @@ $(call Package/libupm/Default/description)
 This package contains $(1) sensor C/C++ library
 endef
 
-define Package/libupm-$(1)-node
-  $(call Package/libupm/Default)
-  $(call UpmPackage/depends,$(1))
-  TITLE:=$(1) Node.js library
-  DEPENDS+=+libupm-$(1) +libmraa-node
-endef
-
-define Package/libupm-$(1)-node/description
-$(call Package/libupm/Default/description)
-
-This package contains $(1) sensor Node.js library
-endef
-
 define Package/libupm-$(1)-python3
   $(call Package/libupm/Default)
   $(call UpmPackage/depends,$(1))
@@ -374,9 +355,6 @@ endef
 define Package/libupm-$(1)/install
 	$(call Package/libupm/install/Default,$$(1),$(1))
 endef
-define Package/libupm-$(1)-node/install
-	$(call Package/libupm/install/Default-node,$$(1),$(1))
-endef
 define Package/libupm-$(1)-python3/install
 	$(call Package/libupm/install/Default-python3,$$(1),$(1))
 endef
@@ -386,5 +364,4 @@ $(eval $(call BuildPackage,libupm))
 $(foreach module, $(UPM_MODULES), \
 	$(eval $(call UpmPackage,$(module))) \
 	$(eval $(call BuildPackage,libupm-$(module))) \
-	$(eval $(call BuildPackage,libupm-$(module)-node)) \
 	$(eval $(call BuildPackage,libupm-$(module)-python3)))

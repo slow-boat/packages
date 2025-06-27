@@ -10,19 +10,18 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=zeromq
-PKG_VERSION:=4.3.4
-PKG_RELEASE:=2
+PKG_VERSION:=4.3.5
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/zeromq/libzmq/releases/download/v$(PKG_VERSION)
-PKG_HASH:=c593001a89f5a85dd2ddf564805deb860e02471171b3f204944857336295c3e5
+PKG_HASH:=6653ef5910f17954861fe72332e68b03ca6e4d9c7160eb3a8de5a5a913bfab43
 
 PKG_MAINTAINER:=Dirk Chang <dirk@kooiot.com>
 PKG_LICENSE:=GPL-3.0-or-later
 PKG_LICENSE_FILES:=LICENCE.txt
 PKG_CPE_ID:=cpe:/a:zeromq:libzmq
 
-PKG_BUILD_PARALLEL:=1
 CMAKE_BINARY_SUBDIR:=openwrt-build
 
 include $(INCLUDE_DIR)/package.mk
@@ -33,7 +32,7 @@ define Package/libzmq/default
   URL:=http://www.zeromq.org/
   SECTION:=libs
   CATEGORY:=Libraries
-  DEPENDS:=+libuuid +libpthread +librt +libstdcpp +USE_GLIBC:libbsd
+  DEPENDS:=+libuuid +libstdcpp
   PROVIDES:=libzmq
 endef
 
@@ -78,7 +77,6 @@ CMAKE_OPTIONS += \
 	-DA2X_EXECUTABLE=OFF \
 	-DASCIIDOC_EXECUTABLE=OFF \
 	-DBUILD_STATIC=OFF \
-	-DCMAKE_SKIP_INSTALL_RPATH=ON \
 	-DZMQ_HAVE_SOCK_CLOEXEC=ON \
 	-DZMQ_HAVE_SO_KEEPALIVE=ON \
 	-DZMQ_HAVE_TCP_KEEPCNT=ON \
@@ -89,8 +87,7 @@ CMAKE_OPTIONS += \
 	-DENABLE_EVENTFD=ON \
 	-DPOLLER=epoll \
 	-DRT_LIBRARY=OFF \
-	-DZMQ_BUILD_TESTS=OFF \
-	-DWITH_LIBBSD=O$(if $(CONFIG_USE_GLIBC),N,FF)
+	-DZMQ_BUILD_TESTS=OFF
 
 ifeq ($(BUILD_VARIANT),curve)
 	CMAKE_OPTIONS += -DWITH_LIBSODIUM=ON

@@ -1,14 +1,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=whois
-PKG_VERSION:=5.5.8
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_VERSION:=5.5.23
+PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=http://ftp.debian.org/debian/pool/main/w/whois
-PKG_HASH:=cd9e7bad3b6968182bfcc311e22be3aec9a974397377d748845147884ce07547
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_VERSION:=v$(PKG_VERSION)
+PKG_SOURCE_URL:=https://github.com/rfc1036/whois
+PKG_MIRROR_HASH:=114893f8dd18fb9a4912deba2afaf09bce593b04a72c73381ec2303d71ff708d
 
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 PKG_BUILD_DEPENDS:=perl/host
 
 PKG_MAINTAINER:=Paul Spooren <mail@aparcar.org>
@@ -19,7 +19,6 @@ PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/nls.mk
 
 define Package/whois
   SECTION:=utils

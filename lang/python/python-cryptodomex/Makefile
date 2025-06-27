@@ -5,31 +5,31 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-cryptodomex
-PKG_VERSION:=3.9.7
-PKG_RELEASE:=2
+PKG_VERSION:=3.18.0
+PKG_RELEASE:=1
 
 PYPI_NAME:=pycryptodomex
-PKG_HASH:=50163324834edd0c9ce3e4512ded3e221c969086e10fdd5d3fdcaadac5e24a78
+PKG_HASH:=3e3ecb5fe979e7c1bb0027e518340acf7ee60415d79295e5251d13c68dde576e
 
-PKG_LICENSE:=BSD-2-Clause
+PKG_LICENSE:=Public-Domain BSD-2-Clause
 PKG_LICENSE_FILES:=LICENSE.rst
 PKG_MAINTAINER:=Richard Yu <yurichard3839@gmail.com>
+PKG_CPE_ID:=cpe:/a:pycryptodome:pycryptodomex
 
 include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
 include ../python3-package.mk
 
-PYTHON3_PKG_SETUP_ARGS:=
-PYTHON3_PKG_SETUP_VARS:= \
+PYTHON3_PKG_BUILD_VARS:= \
   CONFIG_BIG_ENDIAN="$(CONFIG_BIG_ENDIAN)"
 
 define Package/python3-cryptodomex
-  SECTION:=lang-python
+  SECTION:=lang
   CATEGORY:=Languages
   SUBMENU:=Python
-  TITLE:=A self-contained cryptographic library for Python
+  TITLE:=Self-contained cryptographic library
   URL:=https://www.pycryptodome.org/
-  DEPENDS:=+libgmp +python3
+  DEPENDS:=+libgmp +python3-light +python3-cffi
 endef
 
 define Package/python3-cryptodomex/description

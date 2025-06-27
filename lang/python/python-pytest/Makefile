@@ -8,17 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-pytest
-PKG_VERSION:=6.2.2
+PKG_VERSION:=7.4.0
 PKG_RELEASE:=1
 
 PYPI_NAME:=pytest
-PKG_HASH:=9d1edf9e7d0b84d72ea3dbcdfd22b35fb543a5e8f2a60092dd578936bf63d7f9
+PKG_HASH:=b4bf8c45bd59934ed84001ad51e11b4ee40d40a1229d2c79f9c592b0a3f6bd8a
 
-PKG_MAINTAINER:=Jan Pavlinec <jan.pavlinec@nic.cz>
+PKG_MAINTAINER:=Jan Pavlinec <jan.pavlinec1@gmail.com>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
 
-HOST_PYTHON3_PACKAGE_BUILD_DEPENDS:=setuptools-scm
+PKG_BUILD_DEPENDS:=python-setuptools-scm/host
 
 include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk
@@ -29,21 +29,17 @@ define Package/python3-pytest
   SECTION:=lang
   CATEGORY:=Languages
   TITLE:=Python testing framework
-  URL:=https://docs.pytest.org/en/latest/
+  URL:=https://pytest.org/
   DEPENDS:= \
 	+python3 \
-	+python3-more-itertools \
-	+python3-py \
-	+python3-attrs \
-	+python3-pluggy \
+	+python3-iniconfig \
 	+python3-packaging \
-	+python3-toml \
-	+python3-iniconfig
+	+python3-pluggy
 endef
 
 define Package/python3-pytest/description
-  The pytest framework makes it easy to write small tests, yet scales to support
-  complex functional testing for applications and libraries.
+The pytest framework makes it easy to write small tests, yet scales to
+support complex functional testing for applications and libraries.
 endef
 
 $(eval $(call Py3Package,python3-pytest))

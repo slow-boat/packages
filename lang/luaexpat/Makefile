@@ -8,13 +8,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luaexpat
-PKG_VERSION:=1.3.0
+PKG_VERSION:=1.5.2
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://matthewwild.co.uk/projects/luaexpat
-PKG_HASH:=d060397960d87b2c89cf490f330508b7def1a0677bdc120531c571609fc57dc3
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_VERSION:=$(PKG_VERSION)
+PKG_SOURCE_URL:=https://github.com/lunarmodules/luaexpat
+PKG_MIRROR_HASH:=d479e41ea28b71ede214754d0cde87e6582022fcdd3981c928b41491062835c8
 
+PKG_LICENSE:=MIT
+PKG_LICENSE_FILES:=LICENCE
 PKG_CPE_ID:=cpe:/a:matthewwild:luaexpat
 
 include $(INCLUDE_DIR)/package.mk
@@ -23,7 +26,7 @@ define Package/luaexpat
   SUBMENU:=Lua
   SECTION:=lang
   CATEGORY:=Languages
-  TITLE:=LuaExpat 
+  TITLE:=LuaExpat
   URL:=http://matthewwild.co.uk/projects/luaexpat/
   MAINTAINER:=W. Michael Petullo <mike@flyn.org>
   DEPENDS:=+lua +libexpat
@@ -45,7 +48,7 @@ define Build/Compile
 	COMPAT_DIR="$(PKG_BUILD_DIR)/compat-5.1r5" \
 	LDFLAGS="-shared $(TARGET_LDFLAGS)" \
 	CC="$(TARGET_CC) $(TARGET_CFLAGS) $(FPIC) -std=c99" \
-	LD="$(TARGET_CROSS)ld -shared" 
+	LD="$(TARGET_CROSS)ld -shared"
 endef
 
 define Package/luaexpat/install

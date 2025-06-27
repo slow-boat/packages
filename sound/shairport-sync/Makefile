@@ -7,12 +7,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=shairport-sync
-PKG_VERSION:=3.3.7
-PKG_RELEASE:=1
+PKG_VERSION:=4.3.6
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/mikebrady/shairport-sync/tar.gz/$(PKG_VERSION)?
-PKG_HASH:=7f8d4ecec53f2f681a962467bf09205568fc936c8c31a9ee07b1bd72d3d95b12
+PKG_HASH:=f100ed80938ff63d305a260b0f0dd32d012ea9b64884b2802d46d862923439b8
 
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Mike Brady <mikebrady@eircom.net>
@@ -29,7 +29,7 @@ define Package/shairport-sync/default
   SECTION:=sound
   CATEGORY:=Sound
   TITLE:=AirPlay compatible audio player
-  DEPENDS:=@AUDIO_SUPPORT +libpthread +alsa-lib +libconfig +libdaemon +libpopt
+  DEPENDS:=@AUDIO_SUPPORT +libpthread +alsa-lib +libconfig +libdaemon +libpopt +libplist +libsodium +libgcrypt +libffmpeg-full +libuuid +nqptp +libmosquitto
   PROVIDES:=shairport-sync
   URL:=https://github.com/mikebrady/shairport-sync
 endef
@@ -77,6 +77,10 @@ endef
 
 CONFIGURE_ARGS += \
 	--with-alsa \
+	--with-libdaemon \
+	--with-airplay-2 \
+	--with-pipe \
+	--with-mqtt-client \
 	--with-metadata
 
 ifeq ($(BUILD_VARIANT),openssl)
@@ -92,6 +96,8 @@ ifeq ($(BUILD_VARIANT),mini)
 else
   CONFIGURE_ARGS+= --with-avahi --with-soxr
 endif
+
+TARGET_LDFLAGS += -Wl,--as-needed
 
 define Package/shairport-sync/default/conffiles
 /etc/config/shairport-sync

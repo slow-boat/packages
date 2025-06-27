@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openobex
 PKG_VERSION:=1.7.2
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-Source.tar.gz
 PKG_SOURCE_URL:=@SF/openobex
@@ -54,10 +54,11 @@ $(call Package/openobex/Default)
 endef
 
 CMAKE_OPTIONS += \
-	-DBUILD_DOCUMENTATION:BOOL=OFF \
+	-DBUILD_DOCUMENTATION:BOOL=OFF
 
-MAKE_FLAGS += \
-	openobex openobex-apps \
+define Build/Compile
+	$(call Build/Compile/Default,openobex openobex-apps)
+endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include

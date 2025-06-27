@@ -6,14 +6,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=python-et_xmlfile
-PKG_VERSION:=1.0.1
-PKG_RELEASE:=2
+PKG_VERSION:=2.0.0
+PKG_RELEASE:=1
 
-PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>, Eneas U de Queiroz <cote2004-github@yahoo.com>
+PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>, Eneas U de Queiroz <cotequeiroz@gmail.com>
 PKG_LICENSE:=MIT
 
 PYPI_NAME:=et_xmlfile
-PKG_HASH:=614d9722d572f6246302c4491846d2c393c199cfa4edc9af593437691683335b
+PKG_HASH:=dab3f4764309081ce75662649be815c4c9081e88f0837825f90fd28317d4da54
 
 include ../pypi.mk
 include $(INCLUDE_DIR)/package.mk

@@ -6,12 +6,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=stress-ng
-PKG_VERSION:=0.12.04
+PKG_VERSION:=0.19.00
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=https://kernel.ubuntu.com/~cking/tarballs/stress-ng
-PKG_HASH:=b4e34bda8db4ed37e33b7a861bc06ad77cbbd234d63236da2cb58f02e3f3218e
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/ColinIanKing/stress-ng/tar.gz/refs/tags/V$(PKG_VERSION)?
+PKG_HASH:=7d0be69dcdad655145026f499863de01d317e87ff87acd48c3343d451540d172
 
 PKG_MAINTAINER:=Alexandru Ardelean <ardeleanalex@gmail.com>
 PKG_LICENSE:=GPL-2.0-only
@@ -19,6 +19,8 @@ PKG_LICENSE_FILES:=COPYING
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
+# For MIPS there is some inline assembly, and this won't compile without '-mno-mips16'
+PKG_BUILD_FLAGS:=no-mips16
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -26,8 +28,9 @@ define Package/stress-ng
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=stress-ng is a stress test utility
-  URL:=https://kernel.ubuntu.com/~cking/stress-ng/
-  DEPENDS:=+zlib +libbsd +libaio +libsctp
+  URL:=https://github.com/ColinIanKing/stress-ng
+  DEPENDS:=+zlib +libbsd +libaio +libsctp +libkmod +libatomic +libjpeg
+  PROVIDES:=stress
 endef
 
 define Package/stress-ng/description
@@ -35,6 +38,9 @@ stress-ng will stress test a computer system in various selectable ways. It
 was designed to exercise various physical subsystems of a computer as well as
 the various operating system kernel interfaces.
 endef
+
+MAKE_FLAGS += \
+	KERNEL=Linux
 
 define Package/stress-ng/install
 	$(INSTALL_DIR) $(1)/usr/bin

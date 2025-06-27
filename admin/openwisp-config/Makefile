@@ -1,68 +1,63 @@
-# openwisp.org
+# SPDX-Identifier-License: GPL-3.0-only
 #
-# This is free software, licensed under the GNU General Public License v3.
-# See /LICENSE for more information.
+# openwisp.org
+
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openwisp-config
-PKG_SOURCE_VERSION:=0.5.0
-PKG_RELEASE:=1
+PKG_VERSION:=1.1.0
+PKG_RELEASE:=2
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/openwisp/openwisp-config.git
-PKG_MIRROR_HASH:=337a3a9542a0898da9f951256b0d19b6bc87ced98f4ec6dc9646172b551880ef
 PKG_MAINTAINER:=Federico Capoano <f.capoano@openwisp.io>
-PKG_LICENSE:=GPL3.0-or-later
-PKGARCH:=all
+PKG_LICENSE:=GPL-3.0-or-later
+
+PKG_SOURCE_URL:=https://github.com/openwisp/openwisp-config.git
+PKG_MIRROR_HASH:=c78dc17353c642a6f998531f18e20f0651f946d665506a000308e77c02324a79
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_VERSION:=$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/openwisp-config/default
-	TITLE:=Remote configuration management agent ($(2) variant)
-	CATEGORY:=Administration
-	SECTION:=admin
-	SUBMENU:=openwisp
-	DEPENDS:=+curl +lua +libuci-lua +luafilesystem +luci-lib-nixio $(3)
-	VARIANT:=$(1)
-	PKGARCH:=all
-	URL:=http://openwisp.org
+define Package/openwisp-config
+  TITLE:=Remote configuration management agent
+  CATEGORY:=Administration
+  SECTION:=admin
+  SUBMENU:=openwisp
+  DEPENDS:=+curl \
+    +lua \
+    +libuci-lua \
+    +luafilesystem \
+    +luci-lib-nixio \
+    +ca-certificates
+  PKGARCH:=all
+  URL:=https://openwisp.org
 endef
-
-Package/openwisp-config-openssl=$(call Package/openwisp-config/default,openssl,OpenSSL,+ca-certificates +libopenssl)
-Package/openwisp-config-mbedtls=$(call Package/openwisp-config/default,mbedtls,mbedTLS,+ca-certificates +libmbedtls)
-Package/openwisp-config-wolfssl=$(call Package/openwisp-config/default,wolfssl,WolfSSL,+ca-certificates +libwolfssl)
-Package/openwisp-config-nossl=$(call Package/openwisp-config/default,nossl,No SSL)
 
 define Build/Compile
 endef
 
-define Package/openwisp-config-$(BUILD_VARIANT)/conffiles
+define Package/openwisp-config/conffiles
 /etc/config/openwisp
+/etc/openwisp/
 endef
 
-CONFIG_OPENWISP_UCI:=ssl
-
-ifeq ($(BUILD_VARIANT),nossl)
-    CONFIG_OPENWISP_UCI:=nossl
-endif
-
-define Package/openwisp-config-$(BUILD_VARIANT)/install
+define Package/openwisp-config/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \
 		$(1)/etc/init.d \
 		$(1)/etc/config \
-		$(1)/etc/openwisp \
+		$(1)/usr/lib/openwisp-config \
 		$(1)/usr/lib/lua/openwisp
 
 	$(INSTALL_BIN) \
 		$(PKG_BUILD_DIR)/openwisp-config/files/openwisp.agent \
-		$(1)/usr/sbin/openwisp_config
+		$(1)/usr/sbin/openwisp-config
 
 	$(INSTALL_BIN) \
 		$(PKG_BUILD_DIR)/openwisp-config/files/openwisp.init \
-		$(1)/etc/init.d/openwisp_config
+		$(1)/etc/init.d/openwisp-config
 
-	$(INSTALL_CONF) $(PKG_BUILD_DIR)/openwisp-config/files/openwisp-$(CONFIG_OPENWISP_UCI).config \
+	$(INSTALL_CONF) $(PKG_BUILD_DIR)/openwisp-config/files/openwisp.config \
 		$(1)/etc/config/openwisp
 
 	$(INSTALL_BIN) \
@@ -101,10 +96,11 @@ define Package/openwisp-config-$(BUILD_VARIANT)/install
 		$(PKG_BUILD_DIR)/openwisp-config/files/sbin/openwisp-get-address.lua \
 		$(1)/usr/sbin/openwisp-get-address
 
-	$(CP) $(PKG_BUILD_DIR)/VERSION $(1)/etc/openwisp/
+	$(INSTALL_BIN) \
+		$(PKG_BUILD_DIR)/openwisp-config/files/sbin/openwisp-get-random-number.lua \
+		$(1)/usr/sbin/openwisp-get-random-number
+
+	$(CP) $(PKG_BUILD_DIR)/VERSION $(1)/usr/lib/openwisp-config/
 endef
 
-$(eval $(call BuildPackage,openwisp-config-openssl))
-$(eval $(call BuildPackage,openwisp-config-mbedtls))
-$(eval $(call BuildPackage,openwisp-config-wolfssl))
-$(eval $(call BuildPackage,openwisp-config-nossl))
+$(eval $(call BuildPackage,openwisp-config))

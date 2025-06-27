@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luasql
 PKG_VERSION:=2.4.0
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://codeload.github.com/keplerproject/luasql/tar.gz/v$(PKG_VERSION)?
@@ -17,7 +17,7 @@ PKG_HASH:=db2458a8c8c5f3bc717e4030fe2878f1ad8d71e437ec6149c381eebad5d525c5
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=MIT
-PKG_LICENSE_FILES:=docs/us/license.html
+PKG_LICENSE_FILES:=doc/us/license.html
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -94,6 +94,7 @@ ifeq ($(BUILD_VARIANT),sqlite3)
 endif
 
 MAKE_FLAGS += \
+	LIB_OPTION="-shared" \
 	CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 	$(BUILD_VARIANT)
 

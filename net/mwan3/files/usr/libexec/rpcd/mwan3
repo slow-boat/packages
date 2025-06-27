@@ -5,15 +5,11 @@
 . /usr/share/libubox/jshn.sh
 . /lib/mwan3/common.sh
 
-IPS="ipset"
-IPT4="iptables -t mangle -w"
-IPT6="ip6tables -t mangle -w"
-
 report_connected_v4() {
 	local address
 
-	if [ -n "$($IPT4 -S mwan3_connected 2> /dev/null)" ]; then
-		for address in $($IPS -o save list mwan3_connected_v4 | grep add | cut -d " " -f 3); do
+	if [ -n "$($IPT4 -S mwan3_connected_ipv4 2> /dev/null)" ]; then
+		for address in $($IPS -o save list mwan3_connected_ipv4 | grep add | cut -d " " -f 3); do
 			json_add_string "" "${address}"
 		done
 	fi
@@ -23,8 +19,8 @@ report_connected_v6() {
 	[ $NO_IPV6 -ne 0 ] && return
 	local address
 
-	if [ -n "$($IPT6 -S mwan3_connected 2> /dev/null)" ]; then
-		for address in $($IPS -o save list mwan3_connected_v6 | grep add | cut -d " " -f 3); do
+	if [ -n "$($IPT6 -S mwan3_connected_ipv6 2> /dev/null)" ]; then
+		for address in $($IPS -o save list mwan3_connected_ipv6 | grep add | cut -d " " -f 3); do
 			json_add_string "" "${address}"
 		done
 	fi
@@ -96,8 +92,7 @@ get_mwan3_status() {
 	local age=0
 	local online=0
 	local offline=0
-	local up="0"
-	local enabled time_p time_n time_u time_d status track_status
+	local enabled time_p time_n time_u time_d status track_status up uptime
 
 	if [ "${iface}" != "${iface_select}" ] && [ "${iface_select}" != "" ]; then
 		return
@@ -109,15 +104,15 @@ get_mwan3_status() {
 	online=$(get_online_time "$iface")
 	offline=$(get_offline_time "$iface")
 
-	local uptime="0"
-
-	config_get enabled "$iface" enabled 0
-	network_get_uptime uptime "$iface"
-	network_is_up "$iface" && up="1"
+	config_get_bool enabled "$iface" enabled 0
 
 	if [ -f "$MWAN3TRACK_STATUS_DIR/${iface}/STATUS" ]; then
+		network_get_uptime uptime "$iface"
+		network_is_up "$iface" && up="1"
 		status="$(cat "$MWAN3TRACK_STATUS_DIR/${iface}/STATUS")"
 	else
+		uptime=0
+		up=0
 		status="unknown"
 	fi
 
@@ -132,6 +127,7 @@ get_mwan3_status() {
 	json_add_string "status" "${status}"
 	json_add_boolean "enabled" "${enabled}"
 	json_add_boolean "running" "${running}"
+	json_add_string "tracking" "${track_status}"
 	json_add_boolean "up" "${up}"
 	json_add_array "track_ip"
 	for file in $MWAN3TRACK_STATUS_DIR/${iface}/TRACK_*; do

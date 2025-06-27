@@ -6,12 +6,12 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=atheepmgr
 PKG_VERSION:=2.1.1
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE_VERSION:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/rsa9000/$(PKG_NAME).git
-PKG_MIRROR_HASH:=dc77354538bd16343afb3e93c50cdd46792ced0f1632c7be0ddf56d2fcd75ba4
+PKG_MIRROR_HASH:=c221ba20fce2e08bd5aefa46e9e89c3d9ab879e2ecc8f87e87afd0b0b72aa9cd
 
 PKG_MAINTAINER:=Sergey Ryazanov <ryazanov.s.a@gmail.com>
 PKG_LICENSE:=ISC
@@ -60,7 +60,7 @@ endef
 
 MAKE_VARS += \
 	OS=Linux \
-	HAVE_LIBPCIACCESS=n \
+	CONFIG_CON_PCI=n \
 	CONFIG_I_KNOW_WHAT_I_AM_DOING=$(CONFIG_ATHEEPMGR_DANGEROUS_FUNCTIONS) \
 
 define Package/atheepmgr/install

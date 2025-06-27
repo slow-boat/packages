@@ -1,13 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=transmission-web-control
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/ronggang/transmission-web-control
-PKG_SOURCE_DATE:=2019-07-24
-PKG_SOURCE_VERSION:=c27e3ba9f08148f79fb4121d8a1f5906640ff8d6
-PKG_MIRROR_HASH:=6de823b9b8229b176fbb5c9f33f326c0fb23553ae00a36f60d019fdcdf90a712
+PKG_SOURCE_DATE:=2021-09-25
+PKG_SOURCE_VERSION:=4b2e1858f7a46ee678d5d1f3fa1a6cf2c739b88a
+PKG_MIRROR_HASH:=0134b0d03cfc0e0769a2e751caa307f2fd48639bab9bd4d2f3ab720ad04e6ced
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
@@ -34,8 +34,8 @@ define Build/Compile
 endef
 
 define Package/transmission-web-control/install
-	$(INSTALL_DIR) $(1)/usr/share/transmission/web
-	$(CP) $(PKG_BUILD_DIR)/src/* $(1)/usr/share/transmission/web
+	$(INSTALL_DIR) $(1)/usr/share/transmission/public_html
+	$(CP) $(PKG_BUILD_DIR)/src/* $(1)/usr/share/transmission/public_html
 endef
 
 $(eval $(call BuildPackage,transmission-web-control))

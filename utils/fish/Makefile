@@ -5,19 +5,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=fish
-PKG_VERSION:=3.2.0
+PKG_VERSION:=3.7.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://github.com/fish-shell/fish-shell/releases/download/$(PKG_VERSION)
-PKG_HASH:=4f0293ed9f6a6b77e47d41efabe62f3319e86efc8bf83cc58733044fbc6f9211
+PKG_HASH:=614c9f5643cd0799df391395fa6bbc3649427bb839722ce3b114d3bbc1a3b250
 
 PKG_MAINTAINER:=Curtis Jiang <jqqqqqqqqqq@gmail.com>, Hao Dong <halbertdong@gmail.com>
 PKG_LICENSE:=GPL-2.0-only
 PKG_LICENSE_FILES:=COPYING
 PKG_CPE_ID:=cpe:/a:fishshell:fish
-
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -27,7 +25,7 @@ define Package/fish
   CATEGORY:=Utilities
   SUBMENU:=Shells
   TITLE:=A smart and user-friendly command line shell
-  DEPENDS:=+libncurses +libstdcpp +libatomic +librt +libpcre2-32 @!USE_UCLIBC
+  DEPENDS:=+libncurses +libstdcpp +libatomic +libpcre2-32
   URL:=https://fishshell.com
 endef
 
@@ -37,6 +35,10 @@ define Package/fish/description
   autosuggest-as-you-type, and fancy tab completions that just work, with no
   configuration required.
 endef
+
+CMAKE_OPTIONS += \
+	-DBUILD_DOCS=FALSE \
+	-DWITH_GETTEXT=FALSE
 
 define Package/fish/install
 	$(INSTALL_DIR) $(1)/usr/bin

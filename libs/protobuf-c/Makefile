@@ -8,24 +8,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libprotobuf-c
-PKG_VERSION:=1.3.3
-PKG_RELEASE:=2
+PKG_VERSION:=1.4.1
+PKG_RELEASE:=1
 
 PKG_SOURCE:=protobuf-c-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/protobuf-c/protobuf-c/releases/download/v$(PKG_VERSION)
-PKG_HASH:=22956606ef50c60de1fabc13a78fbc50830a0447d780467d3c519f84ad527e78
+PKG_HASH:=4cc4facd508172f3e0a4d3a8736225d472418aee35b4ad053384b137b220339f
 PKG_BUILD_DIR:=$(BUILD_DIR)/protobuf-c-$(PKG_VERSION)
 HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/protobuf-c-$(PKG_VERSION)
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=BSD-2-Clause
 PKG_LICENSE_FILES:=LICENSE
+PKG_CPE_ID:=cpe:/a:protobuf-c_project:protobuf-c
 
 HOST_BUILD_DEPENDS:=protobuf/host
 PKG_BUILD_DEPENDS:=protobuf
 
 CMAKE_INSTALL:=1
-PKG_BUILD_PARALLEL:=1
 CMAKE_SOURCE_SUBDIR:=build-cmake
 
 include $(INCLUDE_DIR)/package.mk
@@ -47,13 +47,14 @@ define Package/libprotobuf-c/description
 endef
 
 CMAKE_HOST_OPTIONS += \
-	-DBUILD_SHARED_LIBS=ON \
+	-DBUILD_SHARED_LIBS=OFF \
 	-DCMAKE_CXX_STANDARD=11 \
 	-DCMAKE_SKIP_RPATH=OFF \
 	-DCMAKE_INSTALL_RPATH="${STAGING_DIR_HOSTPKG}/lib"
 
 CMAKE_OPTIONS += \
-	-DBUILD_SHARED_LIBS=ON
+	-DBUILD_SHARED_LIBS=ON \
+	-DBUILD_PROTOC=OFF
 
 define Package/libprotobuf-c/install
 	$(INSTALL_DIR) $(1)/usr/lib

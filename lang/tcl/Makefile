@@ -9,20 +9,21 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tcl
 TCL_MAJOR_VERSION:=8.6
-PKG_VERSION:=${TCL_MAJOR_VERSION}.10
-PKG_RELEASE:=2
+PKG_VERSION:=${TCL_MAJOR_VERSION}.14
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)$(PKG_VERSION)-src.tar.gz
 PKG_SOURCE_URL:=@SF/$(PKG_NAME)
-PKG_HASH:=5196dbf6638e3df8d5c87b5815c8c2b758496eb6f0e41446596c9a4e638d87ed
+PKG_HASH:=5880225babf7954c58d4fb0f5cf6279104ce1cd6aa9b71e9a6322540e1c4de66
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)$(PKG_VERSION)
 HOST_BUILD_DIR:=$(BUILD_DIR_HOST)/$(PKG_NAME)$(PKG_VERSION)
 
 PKG_MAINTAINER:=Joe Mistachkin <joe@mistachkin.com>
 PKG_LICENSE:=TCL
 PKG_LICENSE_FILES:=license.terms
-PKG_CPE_ID:=cpe:/a:tcl_tk:tcl_tk
+PKG_CPE_ID:=cpe:/a:tcl:tcl
 
+PKG_BUILD_DEPENDS:=HOST_OS_MACOS:fakeuname/host
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
@@ -30,6 +31,10 @@ HOST_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
+
+ifeq ($(CONFIG_HOST_OS_MACOS),y)
+    include ../../utils/fakeuname/fakeuname.mk
+endif
 
 define Package/tcl
   SUBMENU:=Tcl
@@ -52,6 +57,7 @@ endef
 CONFIGURE_PATH := unix
 
 CONFIGURE_VARS += \
+	$(if $(CONFIG_HOST_OS_MACOS),PATH=$(FAKEUNAME_PATH):$(PATH)) \
 	tcl_cv_strtod_unbroken=ok
 
 CONFIGURE_ARGS += \

@@ -5,29 +5,27 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libinput
-PKG_VERSION:=1.16.4
+PKG_VERSION:=1.28.1
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=http://www.freedesktop.org/software/libinput
-PKG_HASH:=65923a06d5a8970e4a999c4668797b9b689614b62b1d44432ab1c87b65e39e29
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://gitlab.freedesktop.org/$(PKG_NAME)/$(PKG_NAME)/-/archive/$(PKG_VERSION)
+PKG_HASH:=a13f8c9a7d93df3c85c66afd135f0296701d8d32f911991b7aa4273fdd6a42a3
 
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=COPYING
-
-PKG_INSTALL:=1
-PKG_BUILD_DEPENDS:=meson/host
+PKG_CPE_ID:=cpe:/a:freedesktop:libinput
 
 include $(INCLUDE_DIR)/package.mk
-include ../../devel/meson/meson.mk
+include $(INCLUDE_DIR)/meson.mk
 
 define Package/libinput
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=a library to handle input devices
-  URL:=http://freedesktop.org/wiki/Software/libinput/
-  DEPENDS:=+libevdev +mtdev +libudev
+  URL:=https://freedesktop.org/wiki/Software/libinput/
+  DEPENDS:=+libevdev +mtdev +libudev +libwacom
 endef
 
 define Package/libinput/description
@@ -40,12 +38,9 @@ endef
 
 MESON_ARGS += \
 	-Depoll-dir=no \
-	-Dlibwacom=false \
+	-Dlibwacom=true \
 	-Ddebug-gui=false \
 	-Dtests=false \
-	-Dinstall-tests=false \
-	-Ddocumentation=false \
-	-Dcoverity=false \
 	-Dzshcompletiondir=no
 
 define Build/InstallDev
@@ -60,8 +55,12 @@ endef
 define Package/libinput/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/{udev,libinput.so.*} $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/usr/libexec/libinput
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/libexec/libinput/* $(1)/usr/libexec/libinput
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) $(PKG_INSTALL_DIR)/usr/bin/libinput $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/libinput $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/share/libinput
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/share/libinput/* $(1)/usr/share/libinput
 endef
 
 $(eval $(call BuildPackage,libinput))

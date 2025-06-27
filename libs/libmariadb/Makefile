@@ -1,6 +1,4 @@
 #
-# Copyright (C) 2019 Sebastian Kemper <sebastian_ml@gmx.net>
-#
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
@@ -8,16 +6,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libmariadb
-PKG_VERSION:=3.1.10
-PKG_RELEASE:=2
+PKG_VERSION:=3.4.1
+PKG_RELEASE:=1
 
 PKG_SOURCE:=mariadb-connector-c-$(PKG_VERSION)-src.tar.gz
-PKG_SOURCE_URL := \
+PKG_SOURCE_URL:=\
 	https://mirror.netcologne.de/mariadb/connector-c-$(PKG_VERSION) \
-	https://mirror.lstn.net/mariadb/connector-c-$(PKG_VERSION) \
 	https://ftp.yz.yamagata-u.ac.jp/pub/dbms/mariadb/connector-c-$(PKG_VERSION) \
-	https://downloads.mariadb.org/interstitial/connector-c-$(PKG_VERSION)
-PKG_HASH:=af3e5613cb9e811f70db85a8a704c7140dc3e35f7c39912d0509511638f9658f
+	https://dlm.mariadb.com/3907132/Connectors/c/connector-c-$(PKG_VERSION)
+PKG_HASH:=0a7f2522a44a7369c1dda89676e43485037596a7b1534898448175178aedeb4d
 PKG_BUILD_DIR:=$(BUILD_DIR)/mariadb-connector-c-$(PKG_VERSION)-src
 
 PKG_MAINTAINER:=Michal Hrusecky <Michal@Hrusecky.net>
@@ -25,20 +22,18 @@ PKG_LICENSE:=LGPL-2.1-or-later
 PKG_LICENSE_FILES:=COPYING.LIB
 PKG_CPE_ID:=cpe:/a:mariadb:mariadb
 
-CMAKE_INSTALL:=1
-PKG_BUILD_PARALLEL:=1
-
 MARIADB_CONF_DIR:=/etc/mysql
 MARIADB_PLUGIN_DIR:=/usr/lib/mariadb/plugin
 
 MARIADB_PORT=3306
-MARIADB_SOCKET=/var/run/mysqld/mysqld.sock
+MARIADB_SOCKET=/var/run/mysql/mysql.sock
 
 MARIADB_CLIENT_PLUGINS := \
 	auth_gssapi_client \
 	remote_io
 
-PKG_BUILD_DEPENDS:=curl
+PKG_BUILD_DEPENDS:=curl USE_MUSL:libucontext
+
 PKG_CONFIG_DEPENDS := \
 	$(patsubst %,CONFIG_PACKAGE_$(PKG_NAME)-plugin-%,$(subst _,-,$(MARIADB_CLIENT_PLUGINS)))
 
@@ -46,11 +41,10 @@ plugin-auth_gssapi_client       := CLIENT_PLUGIN_AUTH_GSSAPI_CLIENT
 plugin-remote_io                := CLIENT_PLUGIN_REMOTE_IO
 
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/cmake.mk
 include $(INCLUDE_DIR)/nls.mk
+include $(INCLUDE_DIR)/cmake.mk
 
-# Pass CPPFLAGS in the CFLAGS as otherwise the build system will
-# ignore them.
+# Pass CPPFLAGS in the CFLAGS as otherwise the build system will ignore them.
 TARGET_CFLAGS+=$(TARGET_CPPFLAGS)
 
 define Package/$(PKG_NAME)/install/plugin
@@ -70,7 +64,7 @@ endef
 
 define Package/$(PKG_NAME)
   $(call Package/$(PKG_NAME)/Default)
-  DEPENDS:=+mariadb-common \
+  DEPENDS:= \
 	  $(ICONV_DEPENDS) \
 	  +libopenssl \
 	  +zlib
@@ -78,10 +72,6 @@ define Package/$(PKG_NAME)
   MENU:=1
   PROVIDES:=libmariadbclient libmysqlclient libmysqlclient-r
   ABI_VERSION:=3
-endef
-
-define Package/$(PKG_NAME)/conffiles
-$(MARIADB_CONF_DIR)/conf.d/50-client.cnf
 endef
 
 define Package/$(PKG_NAME)/description
@@ -94,10 +84,9 @@ endef
 # We won't need unit tests
 CMAKE_OPTIONS += -DWITH_UNIT_TESTS=0
 
-# Make it explicit that we are cross-compiling
-CMAKE_OPTIONS += -DCMAKE_CROSSCOMPILING=1
-
 CMAKE_OPTIONS += \
+	-DDEFAULT_CHARSET=utf8 \
+	-DDEFAULT_COLLATION=utf8_general_ci \
 	-DINSTALL_INCLUDEDIR=include/mysql \
 	-DINSTALL_LIBDIR=lib \
 	-DINSTALL_PLUGINDIR=lib/mariadb/plugin \
@@ -158,7 +147,6 @@ define Package/$(PKG_NAME)/install
 		$(PKG_INSTALL_DIR)$(MARIADB_PLUGIN_DIR)/sha256_password.so \
 		$(1)$(MARIADB_PLUGIN_DIR)
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/lib/libmariadb.so.$(ABI_VERSION) $(1)/usr/lib
-	$(INSTALL_DATA) conf/50-client.cnf $(1)$(MARIADB_CONF_DIR)/conf.d
 endef
 
 define BuildPlugin

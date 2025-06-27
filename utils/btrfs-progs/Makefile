@@ -6,12 +6,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=btrfs-progs
-PKG_VERSION:=5.10
-PKG_RELEASE:=1
+PKG_VERSION:=6.11
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)-v$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@KERNEL/linux/kernel/people/kdave/btrfs-progs
-PKG_HASH:=e71a0d6dd504f3a5d957fce9a30281eb61ecf991c8af315fe0061a1b97a1d021
+PKG_HASH:=ff9ae91521303a90d87e1c4be230f0121f39c44ddbe52c2aeae263c6fecfa099
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-v$(PKG_VERSION)
 
 PKG_MAINTAINER:=Karel Kočí <karel.koci@nic.cz>
@@ -21,6 +21,7 @@ PKG_LICENSE_FILES:=COPYING
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 PKG_BUILD_DEPENDS:=acl
+PKG_BUILD_FLAGS:=gc-sections
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -29,7 +30,7 @@ define Package/btrfs-progs
   CATEGORY:=Utilities
   SUBMENU:=Filesystem
   TITLE:=Btrfs filesystems utilities
-  URL:=https://btrfs.wiki.kernel.org/
+  URL:=https://btrfs.readthedocs.io
   DEPENDS:= \
     +libattr \
     +libuuid \
@@ -56,8 +57,7 @@ endef
 boxprogs = btrfsck mkfs.btrfs btrfs-image btrfstune btrfs-find-root
 progs = btrfs-map-logical btrfs-select-super
 
-TARGET_CFLAGS += -ffunction-sections -fdata-sections
-TARGET_LDFLAGS += -Wl,--gc-sections -Wl,--as-needed
+TARGET_LDFLAGS += -Wl,--as-needed
 
 EXTRA_CFLAGS=$(TARGET_CPPFLAGS)
 
@@ -65,7 +65,9 @@ CONFIGURE_ARGS += \
 	--disable-backtrace \
 	--disable-convert \
 	--disable-documentation \
+	--disable-libudev \
 	--disable-python
+
 ifneq ($(CONFIG_BTRFS_PROGS_ZSTD),y)
 CONFIGURE_ARGS += --disable-zstd
 endif
@@ -89,7 +91,8 @@ define Package/btrfs-progs/install
 	$(foreach prog,$(boxprogs),$(LN) btrfs $(1)/usr/bin/$(prog);)
 	$(foreach prog,$(progs),$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(prog) $(1)/usr/bin/;)
 	$(INSTALL_DIR) $(1)/lib/preinit
-	$(INSTALL_BIN) ./files/btrfs-scan.init $(1)/lib/preinit/85_btrfs_scan
+	$(INSTALL_BIN) ./files/btrfs-scan.init $(1)/lib/preinit/85_btrfs_scan_post
+	$(LN) ./85_btrfs_scan_post $(1)/lib/preinit/78_btrfs_scan_pre
 endef
 
 $(eval $(call BuildPackage,btrfs-progs))

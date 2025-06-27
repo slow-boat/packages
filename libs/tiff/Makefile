@@ -8,19 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tiff
-PKG_VERSION:=4.2.0
-PKG_RELEASE:=2
+PKG_VERSION:=4.7.0
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://download.osgeo.org/libtiff
-PKG_HASH:=eb0484e568ead8fa23b513e9b0041df7e327f4ee2d22db5a533929dfc19633cb
+PKG_HASH:=67160e3457365ab96c5b3286a0903aa6e78bdc44c4bc737d2e486bcecb6ba976
 
 PKG_MAINTAINER:=Jiri Slachta <jiri@slachta.eu>
-PKG_LICENSE:=BSD-3-Clause
+PKG_LICENSE:=libtiff
 PKG_LICENSE_FILES:=COPYRIGHT
 PKG_CPE_ID:=cpe:/a:libtiff:libtiff
-
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -36,7 +34,7 @@ $(call Package/tiff/Default)
   CATEGORY:=Libraries
   TITLE+= library
   DEPENDS:=+zlib +libjpeg
-  ABI_VERSION:=5
+  ABI_VERSION:=6
 endef
 
 define Package/tiff-utils
@@ -50,25 +48,14 @@ endef
 
 CMAKE_OPTIONS += \
 	-Dld-version-script=OFF \
-	-Dccitt=ON \
-	-Dpackbits=ON \
-	-Dlzw=ON \
-	-Dthunder=ON \
-	-Dnext=ON \
-	-Dlogluv=ON \
-	-Dmdi=ON \
-	-Dzlib=ON \
-	-Dpixarlog=ON \
-	-Djpeg=ON \
 	-Dold-jpeg=OFF \
 	-Djbig=OFF \
 	-Dlzma=OFF \
 	-Dzstd=OFF \
 	-Dwebp=OFF \
 	-Djpeg12=OFF \
-	-Dcxx=OFF
-
-TARGET_CFLAGS += $(TARGET_CPPFLAGS)
+	-Dcxx=OFF \
+	-Dlibdeflate=OFF
 
 define Build/InstallDev
 	$(call Build/InstallDev/cmake,$(1))

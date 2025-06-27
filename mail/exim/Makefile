@@ -1,12 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=exim
-PKG_VERSION:=4.94
+PKG_VERSION:=4.98.2
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://ftp.exim.org/pub/exim/exim4/
-PKG_HASH:=f77ee8faf04f5db793243c3ae81c1f4e452cd6ad7dd515a80edf755c4b144bdb
+PKG_HASH:=88b8e8a67c1db6cc0b1d148161aa36e662f4ca2fef25d5b6f3694d490e42dcae
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
 
 PKG_LICENSE:=GPL-2.0-or-later
@@ -45,10 +45,10 @@ LOOKUPS:= \
 define Package/exim/Default
   SECTION:=mail
   CATEGORY:=Mail
-  DEPENDS:=+libdb47 +libpcre $(ICONV_DEPENDS) +BUILD_NLS:libidn2 +BUILD_NLS:libidn
+  DEPENDS:=+libdb47 +libpcre2 $(ICONV_DEPENDS) +BUILD_NLS:libidn2 +BUILD_NLS:libidn
   TITLE:=Exim message transfer agent
   URL:=http://www.exim.org/
-  USERID:=mail=42:mail=42
+  USERID:=exim=42:exim=42
 endef
 
 define Package/exim
@@ -138,7 +138,7 @@ define Package/exim/conffiles
 endef
 
 HOST_CFLAGS += -std=c99
-TARGET_CFLAGS += $(FPIC) -DNO_IP_OPTIONS -D_FILE_OFFSET_BITS=64
+TARGET_CFLAGS += $(FPIC) -DNO_IP_OPTIONS -D_FILE_OFFSET_BITS=64 -DNO_EXECINFO
 
 MAKE_VARS += build=Linux-$$(ARCH)
 MAKE_FLAGS += AR="$$(TARGET_AR) r"
@@ -149,16 +149,17 @@ define Build/Configure
 	echo "PID_FILE_PATH=/var/run/exim.pid" >> $(PKG_BUILD_DIR)/Local/Makefile
 	echo "BIN_DIRECTORY=/usr/sbin" >> $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%CONFIGURE_FILE=/usr/exim/configure%CONFIGURE_FILE=/etc/exim/exim.conf%' $(PKG_BUILD_DIR)/Local/Makefile
-	$(SED) 's%# EXIM_GROUP=%EXIM_GROUP=42%' $(PKG_BUILD_DIR)/Local/Makefile
-	$(SED) 's%# EXIM_USER=exim%EXIM_USER=42%' $(PKG_BUILD_DIR)/Local/Makefile
+	$(SED) 's%# EXIM_GROUP=.*%EXIM_GROUP=42%' $(PKG_BUILD_DIR)/Local/Makefile
+	$(SED) 's%# EXIM_USER=.*%EXIM_USER=42%' $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%# INCLUDE=.*%INCLUDE=-I$(STAGING_DIR)/usr/include -I$(STAGING_DIR)/usr/include%' $(PKG_BUILD_DIR)/Local/Makefile
-	$(SED) 's%# HAVE_IPV6=YES%HAVE_IPV6=YES%' $(PKG_BUILD_DIR)/Local/Makefile
+	$(SED) 's%# HAVE_IPV6=yes%HAVE_IPV6=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%# WITH_CONTENT_SCAN=yes%WITH_CONTENT_SCAN=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%# SUPPORT_MAILDIR=yes%SUPPORT_MAILDIR=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%# SUPPORT_MAILSTORE=yes%SUPPORT_MAILSTORE=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 	$(SED) 's%# SUPPORT_MBX=yes%SUPPORT_MBX=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 # enable lookup modules
 	$(SED) 's%# LOOKUP_DSEARCH=yes%LOOKUP_DSEARCH=yes%' $(PKG_BUILD_DIR)/Local/Makefile
+	$(SED) 's%# TRANSPORT_LMTP=yes%TRANSPORT_LMTP=yes%' $(PKG_BUILD_DIR)/Local/Makefile
 ifdef CONFIG_PACKAGE_exim-lookup-dbmdb
 	$(SED) 's%LOOKUP_DBM=yes%LOOKUP_DBM=2%' $(PKG_BUILD_DIR)/Local/Makefile
 else
@@ -262,9 +263,22 @@ endif
 	$(HOST_MAKE_VARS) $(MAKE) $(HOST_MAKE_FLAGS) $(HOST_MAKE_VARS) -C $(PKG_BUILD_DIR)/build-Linux-$(ARCH) macro_predef
 endef
 
+define Package/exim/conffiles
+/etc/exim/
+endef
+
+Package/exim-gnutls/conffiles = $(Package/exim/conffiles)
+Package/exim-openssl/conffiles = $(Package/exim/conffiles)
+Package/exim-ldap/conffiles = $(Package/exim/conffiles)
+
 define Package/exim/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/build-Linux-$(ARCH)/exim $(1)/usr/sbin
+	$(INSTALL_DIR) $(1)/etc/exim
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/src/configure.default $(1)/etc/exim/exim.conf
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/exim.init $(1)/etc/init.d/exim
+	$(INSTALL_DIR) $(1)/usr/lib/exim/lookups
 endef
 
 Package/exim-gnutls/install = $(Package/exim/install)

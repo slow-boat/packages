@@ -9,7 +9,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=taskwarrior
 PKG_VERSION:=2.5.3
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_RELEASE:=3
 
 PKG_SOURCE:=task-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.taskwarrior.org/download
@@ -19,9 +19,6 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/task-$(PKG_VERSION)
 PKG_MAINTAINER:=
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=LICENSE
-
-PKG_BUILD_PARALLEL:=1
-PKG_INSTALL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk

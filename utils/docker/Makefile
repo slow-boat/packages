@@ -1,8 +1,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=docker
-PKG_VERSION:=20.10.4
-PKG_RELEASE:=1
+PKG_VERSION:=27.3.1
+PKG_RELEASE:=2
 PKG_LICENSE:=Apache-2.0
 PKG_LICENSE_FILES:=LICENSE
 
@@ -10,14 +10,14 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_GIT_URL:=github.com/docker/cli
 PKG_GIT_REF:=v$(PKG_VERSION)
 PKG_SOURCE_URL:=https://codeload.$(PKG_GIT_URL)/tar.gz/$(PKG_GIT_REF)?
-PKG_HASH:=2757ce724b80289d834618f338faa49c512240f3006d18119677f63ec12f0631
-PKG_GIT_SHORT_COMMIT:=d3cb89e # SHA1 used within the docker executables
+PKG_HASH:=df7d44387166d90954e290dfbe0a278649bf71d0e89933615bdc0757580b68e4
+PKG_GIT_SHORT_COMMIT:=ce12230 # SHA1 used within the docker executables
 
 PKG_MAINTAINER:=Gerard Ryan <G.M0N3Y.2503@gmail.com>
 
-PKG_BUILD_DEPENDS:=golang/host
+PKG_BUILD_DEPENDS:=golang/host dockerd
 PKG_BUILD_PARALLEL:=1
-PKG_USE_MIPS16:=0
+PKG_BUILD_FLAGS:=no-mips16
 
 GO_PKG:=$(PKG_GIT_URL)
 
@@ -36,9 +36,13 @@ define Package/docker/description
 The CLI used in the Docker CE and Docker EE products.
 endef
 
-GO_PKG_BUILD_VARS += GO111MODULE=auto
+GO_PKG_INSTALL_EXTRA:=\
+	cli/compose/schema/data \
+	vendor/google.golang.org/protobuf/internal/editiondefaults/editions_defaults.binpb
+
 TAR_OPTIONS:=--strip-components 1 $(TAR_OPTIONS)
 TAR_CMD=$(HOST_TAR) -C $(1) $(TAR_OPTIONS)
+TARGET_LDFLAGS += $(if $(CONFIG_USE_GLIBC),-lc -lgcc_eh)
 
 define Build/Prepare
 	$(Build/Prepare/Default)

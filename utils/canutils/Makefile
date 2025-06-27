@@ -8,19 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=canutils
-PKG_VERSION:=2020.12.0
+PKG_VERSION:=2023.03
 PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://codeload.github.com/linux-can/can-utils/tar.gz/v$(PKG_VERSION)?
-PKG_HASH:=c5c22a00ce2ea7578d7617ac0affef8f47a349be58e708780d703b979f324a2b
-PKG_BUILD_DIR:=$(BUILD_DIR)/can-utils-$(PKG_VERSION)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_VERSION:=v$(PKG_VERSION)
+PKG_SOURCE_URL:=https://github.com/linux-can/can-utils
+PKG_MIRROR_HASH:=bea66321c9cea53f44ace2357ca3829a77dbf5d399a09ed0798a659d682d1afa
 
 PKG_MAINTAINER:=Anton Glukhov <anton.a.glukhov@gmail.com>
 PKG_LICENSE:=GPL-2.0-or-later
-PKG_LICENSE_FILES:=COPYING
-
-PKG_BUILD_PARALLEL:=1
+PKG_LICENSE_FILES:=LICENSES/BSD-3-Clause LICENSES/GPL-2.0-only.txt LICENSES/Linux-syscall-note.txt
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -50,7 +48,7 @@ define GenPlugin
 endef
 
 FILES:= \
-	asc2log bcmserver canbusload can-calc-bit-timing \
+	asc2log bcmserver canbusload \
 	candump canfdtest cangen cangw canlogserver canplayer \
 	cansend cansniffer isotpdump isotpperf isotprecv isotpsend \
 	isotpserver isotpsniffer isotptun j1939acd j1939cat j1939spy j1939sr \

@@ -8,17 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gpsd
-PKG_VERSION:=3.21
-PKG_RELEASE:=2
+PKG_VERSION:=3.25
+PKG_RELEASE:=7
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=@SAVANNAH/$(PKG_NAME)
-PKG_HASH:=5512a7d3c2e86be83c5555652e5b4cc9049e8878a4320be7f039eb1a7203e5f0
+PKG_HASH:=7e5e53e5ab157dce560a2f22e20322ef1136d3ebde99162def833a3306de01e5
 
 PKG_MAINTAINER:=Pushpal Sidhu <psidhu.devel@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=COPYING
-PKG_CPE_ID:=cpe:/a:berlios:gps_daemon
+PKG_CPE_ID:=cpe:/a:gpsd_project:gpsd
 
 PKG_BUILD_DEPENDS:=scons/host
 
@@ -45,6 +45,7 @@ define Package/gpsd
   SECTION:=utils
   CATEGORY:=Utilities
   TITLE:=An interface daemon for GPS receivers
+  DEPENDS+= +gpsd-utils
 endef
 
 define Package/gpsd/conffiles
@@ -70,11 +71,24 @@ define Package/gpsd-clients/description
   testing the GPS daemon.
 endef
 
+define Package/gpsd-utils
+  $(call Package/gpsd/Default)
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE:=GPS daemon utils
+endef
+
+define Package/gpsd-utils/description
+  $(call Package/gpsd/Default/description)
+  This package contains utilities for interacting with GPS daemon.
+endef
+
 define Package/libgps
   $(call Package/gpsd/Default)
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=C service library for communicating with the GPS daemon
+  ABI_VERSION:=30
 endef
 
 define Package/libgps/description
@@ -83,9 +97,11 @@ define Package/libgps/description
 endef
 
 SCONS_VARS += \
+	CFLAGS="$(TARGET_CFLAGS) $(EXTRA_CFLAGS) -L$(STAGING_DIR)/usr/lib" \
 	LINKFLAGS="$(TARGET_LDFLAGS)"
 
 SCONS_OPTIONS += \
+	target_platform=linux \
 	dbus_export=no \
 	tsip=no \
 	fv18=no \
@@ -104,7 +120,7 @@ SCONS_OPTIONS += \
 	implicit_link=no \
 	chrpath=no \
 	manbuild=no \
-	sysroot="$(STAGING_DIR)" \
+	sysroot="$(TOOLCHAIN_ROOT_DIR)" \
 	target="$(TARGET_CROSS:-=)"
 
 define Build/InstallDev
@@ -125,6 +141,12 @@ define Package/gpsd/install
 	$(INSTALL_BIN) ./files/gpsd.init $(1)/etc/init.d/gpsd
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/gpsd $(1)/usr/sbin/
+
+	$(INSTALL_DIR) $(1)/etc/gpsd
+	$(INSTALL_BIN) ./files/etc/gpsd/device-hook $(1)/etc/gpsd/
+
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_DATA) ./files/etc/uci-defaults/* $(1)/etc/uci-defaults/
 endef
 
 define Package/gpsd-clients/install
@@ -137,11 +159,17 @@ define Package/gpsd-clients/install
 		$(1)/usr/bin/
 endef
 
+define Package/gpsd-utils/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/gpsdctl $(1)/usr/sbin/
+endef
+
 define Package/libgps/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libgps.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libgps.so.$(ABI_VERSION)* $(1)/usr/lib/
 endef
 
 $(eval $(call BuildPackage,gpsd))
 $(eval $(call BuildPackage,gpsd-clients))
+$(eval $(call BuildPackage,gpsd-utils))
 $(eval $(call BuildPackage,libgps))

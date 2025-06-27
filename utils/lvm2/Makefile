@@ -9,12 +9,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=LVM2
-PKG_VERSION:=2.03.11
-PKG_RELEASE:=1
+PKG_VERSION:=2.03.31
+PKG_VERSION_DM:=1.02.205
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME).$(PKG_VERSION).tgz
-PKG_SOURCE_URL:=https://sourceware.org/pub/lvm2
-PKG_HASH:=842c4510d4653990927d4518a5bf2743126a37531671a05842cdaf8d54bb9dd4
+PKG_SOURCE_URL:=https://sourceware.org/pub/lvm2 \
+                https://www.mirrorservice.org/sites/sourceware.org/pub/lvm2
+
+PKG_HASH:=5db2956a00fbf87d92274cccc92436387ec0c3faadece7413ece1ba1c10c98ff
 PKG_BUILD_DIR:=$(BUILD_DIR)/lvm2-$(BUILD_VARIANT)/$(PKG_NAME).$(PKG_VERSION)
 
 PKG_MAINTAINER:=Daniel Golle <daniel@makrotopia.org>
@@ -31,14 +34,14 @@ define Package/libdevmapper/Default
   CATEGORY:=Libraries
   TITLE:=The Linux Kernel Device Mapper userspace library
   URL:=https://sourceware.org/dm/
+  VERSION:=$(PKG_VERSION_DM)
   DEPENDS:=+kmod-dm +libpthread +libuuid +librt +libblkid
 endef
 
 
-define Package/libdevmapper-normal
+define Package/libdevmapper
   $(call Package/libdevmapper/Default)
   VARIANT := normal
-  PROVIDES := libdevmapper
 endef
 
 define Package/libdevmapper-selinux
@@ -48,13 +51,13 @@ define Package/libdevmapper-selinux
   PROVIDES := libdevmapper
 endef
 
-define Package/libdevmapper-normal/description
+define Package/libdevmapper/description
  The device-mapper is a component of the 2.6 linux kernel that supports logical
  volume management. It is required by LVM2 and EVMS.
 endef
 
 define Package/libdevmapper-selinux/description
-$(call Package/libdevmapper-normal/description)
+$(call Package/libdevmapper/description)
  This variant supports SELinux
 
 endef
@@ -68,11 +71,10 @@ define Package/lvm2/default
   DEPENDS:=+libreadline +libncurses +libaio
 endef
 
-define Package/lvm2-normal
+define Package/lvm2
   $(call Package/lvm2/default)
   VARIANT := normal
-  DEPENDS += +libdevmapper-normal
-  PROVIDES := lvm2
+  DEPENDS += +libdevmapper
 endef
 
 define Package/lvm2-selinux
@@ -82,14 +84,14 @@ define Package/lvm2-selinux
   PROVIDES := lvm2
 endef
 
-define Package/lvm2-normal/description
+define Package/lvm2/description
  LVM2 refers to a new userspace toolset that provide logical volume management
  facilities on linux. It is reasonably backwards-compatible with the original
  LVM toolset.
 endef
 
 define Package/lvm2-selinux/description
-$(call Package/lvm2-normal/description)
+$(call Package/lvm2/description)
  This variant supports SELinux
 
 endef
@@ -101,6 +103,7 @@ CONFIGURE_ARGS += \
 	--with-default-dm-run-dir=/var/run \
 	--with-default-run-dir=/var/run/lvm \
 	--with-default-locking-dir=/var/lock/lvm \
+	--without-libnvme \
 	--$(if $(findstring selinux,$(BUILD_VARIANT)),en,dis)able-selinux
 
 ifneq ($(shell /bin/sh -c "echo -n 'X'"),X)
@@ -125,14 +128,14 @@ define Build/InstallDev
 	$(CP) $(PKG_BUILD_DIR)/libdm/libdevmapper.pc $(1)/usr/lib/pkgconfig
 endef
 
-define Package/libdevmapper-normal/install
+define Package/libdevmapper/install
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libdevmapper.so.* $(1)/usr/lib
 endef
 
-Package/libdevmapper-selinux/install = $(Package/libdevmapper-normal/install)
+Package/libdevmapper-selinux/install = $(Package/libdevmapper/install)
 
-define Package/lvm2-normal/install
+define Package/lvm2/install
 	$(INSTALL_DIR) $(1)/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/lvm $(1)/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/dmsetup $(1)/sbin
@@ -146,18 +149,20 @@ define Package/lvm2-normal/install
 	$(INSTALL_DATA) ./files/lvm2.preinit $(1)/lib/preinit/80_lvm2
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/lvm2.init $(1)/etc/init.d/lvm2
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/block
+	$(INSTALL_DATA) ./files/lvm2.hotplug $(1)/etc/hotplug.d/block/20-lvm2
 	$(FIND) $(PKG_INSTALL_DIR)/usr/sbin/ -type l -exec $(CP) -a {} $(1)/sbin/ \;
 endef
 
-Package/lvm2-selinux/install = $(Package/lvm2-normal/install)
+Package/lvm2-selinux/install = $(Package/lvm2/install)
 
-define Package/lvm2-normal/conffiles
+define Package/lvm2/conffiles
 /etc/lvm/lvm.conf
 endef
 
 Package/lvm2-selinux/conffiles = $(Package/lvm2/conffiles)
 
-$(eval $(call BuildPackage,libdevmapper-normal))
+$(eval $(call BuildPackage,libdevmapper))
 $(eval $(call BuildPackage,libdevmapper-selinux))
-$(eval $(call BuildPackage,lvm2-normal))
+$(eval $(call BuildPackage,lvm2))
 $(eval $(call BuildPackage,lvm2-selinux))

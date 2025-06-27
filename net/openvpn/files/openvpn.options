@@ -54,7 +54,6 @@ iroute_ipv6
 keepalive
 key
 key_direction
-keysize
 learn_address
 link_mtu
 lladdr
@@ -107,6 +106,7 @@ secret
 server
 server_bridge
 server_ipv6
+server_poll_timeout
 setenv
 shaper
 sndbuf
@@ -149,6 +149,7 @@ client
 client_to_client
 comp_noadapt
 disable
+disable_dco
 disable_occ
 down_pre
 duplicate_cn
@@ -176,6 +177,7 @@ persist_remote_ip
 persist_tun
 ping_timer_rem
 pull
+push_peer_info
 push_reset
 remote_random
 rmtun

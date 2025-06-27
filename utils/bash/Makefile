@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bash
-PKG_VERSION:=5.1
-PKG_RELEASE:=2
+PKG_VERSION:=5.2.37
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/bash
-PKG_HASH:=cc012bc860406dcf42f64431bcd3d2fa7560c02915a601aba9cd597a39329baa
+PKG_HASH:=9599b22ecd1d5787ad7d3b7bf0c59f312b3396d1e281175dd1f8a4014da621ff
 
 PKG_MAINTAINER:=Marcel Denia <naoir@gmx.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -31,7 +31,7 @@ define Package/bash
   SUBMENU:=Shells
   TITLE:=The GNU Bourne Again SHell
   DEPENDS:=+libncurses +libreadline
-  URL:=http://www.gnu.org/software/bash/
+  URL:=https://www.gnu.org/software/bash/
 endef
 
 define Package/bash/description
@@ -43,6 +43,7 @@ endef
 define Package/bash/conffiles
 /etc/bash.bashrc
 /etc/bash.bash_logout
+/etc/profile.d/sys_bashrc.sh
 endef
 
 # Bash detects and enables certain features by runtest simple piece of code
@@ -67,6 +68,7 @@ CONFIGURE_VARS += \
 	bash_cv_job_control_missing=present \
 	bash_cv_dev_fd=whacky \
 	bash_cv_sys_named_pipes=present \
+	CFLAGS_FOR_BUILD="-std=gnu17" \
 
 # The following are some other tests that cannot run when cross-compiling
 CONFIGURE_VARS += \
@@ -81,6 +83,8 @@ CONFIGURE_ARGS+= \
 	--enable-direxpand-default \
 	--enable-job-control \
 	--enable-readline
+
+TARGET_CFLAGS += -std=gnu17
 
 define Package/bash/postinst
 #!/bin/sh
@@ -98,3 +102,4 @@ define Package/bash/install
 endef
 
 $(eval $(call BuildPackage,bash))
+
