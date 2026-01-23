@@ -1,0 +1,48 @@
+Index: dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/network/multicastsocket.c
++++ dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
+@@ -71,6 +71,7 @@ int setup_multicast_socket(const char *_
+         dawnlog_perror("setsockopt:IP_ADD_MEMBERSHIP");
+         // FIXME: Is close() required?
+         close(sock);
++        exit(EXIT_FAILURE);
+     }
+     return sock;
+ }
+Index: dawn-2025.11.07~7414c34a/src/storage/datastorage.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/storage/datastorage.c
++++ dawn-2025.11.07~7414c34a/src/storage/datastorage.c
+@@ -180,8 +180,8 @@ void send_beacon_requests(ap* target_ap,
+         if (i->rrm_enabled_capa & dawn_metric.rrm_mode_mask)
+         {
+             int ubus_status = ubus_send_beacon_request(i, target_ap, dawn_metric.duration, sub_id);
+-            if (ubus_status) /* change to info since this can happen if devices go offline and we dont want to flood logs */
+-                dawnlog_info("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
++            if (ubus_status)
++                dawnlog_warning("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
+                     MAC2STR(i->client_addr.u8), MAC2STR(target_ap->bssid_addr.u8));
+         }
+ 
+Index: dawn-2025.11.07~7414c34a/src/network/networksocket.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/network/networksocket.c
++++ dawn-2025.11.07~7414c34a/src/network/networksocket.c
+@@ -1,6 +1,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <errno.h>
+ #include <libubox/blobmsg_json.h>
+ 
+ #include "utils.h"
+@@ -70,7 +71,7 @@ static void* receive_msg_inner(void* arg
+ 
+         //FIXME: Next few lines look a bit mangled, with odd strlen() tests, etc...
+         if (recv_string_len < 0) {
+-            dawnlog_error("Could not receive message!");
++            dawnlog_error("Could not receive message!: %d: %s", errno, strerror(errno));
+             continue;
+         }
+ 
