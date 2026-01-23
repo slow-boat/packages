@@ -2,8 +2,16 @@ Index: dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
 ===================================================================
 --- dawn-2025.11.07~7414c34a.orig/src/network/multicastsocket.c
 +++ dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
-@@ -71,6 +71,7 @@ int setup_multicast_socket(const char *_
-         dawnlog_perror("setsockopt:IP_ADD_MEMBERSHIP");
+@@ -68,9 +68,14 @@ int setup_multicast_socket(const char *_
+                    IPPROTO_IP,
+                    IP_ADD_MEMBERSHIP,
+                    &command, sizeof(command)) < 0) {
+-        dawnlog_perror("setsockopt:IP_ADD_MEMBERSHIP");
++    	if(errno == ENODEV)
++    		dawnlog_warning("No interface available for multicast");
++    	else
++    		dawnlog_perror("setsockopt:IP_ADD_MEMBERSHIP");
++
          // FIXME: Is close() required?
          close(sock);
 +        exit(EXIT_FAILURE);
@@ -46,3 +54,51 @@ Index: dawn-2025.11.07~7414c34a/src/network/networksocket.c
              continue;
          }
  
+Index: dawn-2025.11.07~7414c34a/src/utils/ubus.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/utils/ubus.c
++++ dawn-2025.11.07~7414c34a/src/utils/ubus.c
+@@ -1697,17 +1697,11 @@ bool subscribe(struct ubus_context *ctx_
+ 
+     sprintf(subscribe_name, "hostapd.%s", hostapd_entry->iface_name);
+ 
+-    if (ubus_lookup_id(ctx_local, subscribe_name, &hostapd_entry->id)) {
+-        dawnlog_warning("Failed to lookup ID!");
+-        subscription_wait(&hostapd_entry->wait_handler);
+-        return false;
+-    }
+-
+-    if (ubus_subscribe(ctx_local, &hostapd_entry->subscriber, hostapd_entry->id)) {
+-        dawnlog_warning("Failed to register subscriber!");
+-        subscription_wait(&hostapd_entry->wait_handler);
+-        return false;
+-    }
++    if (ubus_lookup_id(ctx_local, subscribe_name, &hostapd_entry->id))
++    	goto subscription_wait;
++
++    if (ubus_subscribe(ctx_local, &hostapd_entry->subscriber, hostapd_entry->id))
++    	goto subscription_wait;
+ 
+     hostapd_entry->subscribed = true;
+ 
+@@ -1726,6 +1720,10 @@ bool subscribe(struct ubus_context *ctx_
+     dawnlog_debug("Subscribed to: %s\n", hostapd_entry->iface_name);
+ 
+     return true;
++subscription_wait:
++	dawnlog_warning("radio interface %s service not ready yet", hostapd_entry->iface_name);
++	subscription_wait(&hostapd_entry->wait_handler);
++	return false;
+ }
+ 
+ static void
+@@ -1758,7 +1756,8 @@ wait_cb(struct ubus_context *ctx_local,
+     if (strcmp(sub->iface_name, path + 1))
+         return;
+ 
+-    subscribe(ctx_local, sub);
++    if(subscribe(ctx_local, sub))
++    	dawnlog_warning("radio interface %s service subscribed", sub->iface_name);
+ }
+ 
+ bool subscriber_to_interface(const char *ifname) {
