@@ -2,7 +2,15 @@ Index: dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
 ===================================================================
 --- dawn-2025.11.07~7414c34a.orig/src/network/multicastsocket.c
 +++ dawn-2025.11.07~7414c34a/src/network/multicastsocket.c
-@@ -68,9 +68,14 @@ int setup_multicast_socket(const char *_
+@@ -2,6 +2,7 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <errno.h>
+ 
+ #include "utils.h"
+ #include "multicastsocket.h"
+@@ -68,9 +69,14 @@ int setup_multicast_socket(const char *_
                     IPPROTO_IP,
                     IP_ADD_MEMBERSHIP,
                     &command, sizeof(command)) < 0) {
