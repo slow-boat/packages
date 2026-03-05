@@ -1,0 +1,12 @@
+Index: dawn-2025.11.07~7414c34a/src/network/networksocket.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/network/networksocket.c
++++ dawn-2025.11.07~7414c34a/src/network/networksocket.c
+@@ -78,6 +78,7 @@ static void* receive_msg_inner(void* arg
+         if (recv_string_len == 0) {
+             return 0;
+         }
++        recv_string[recv_string_len] = '\0'; /* don't forget to NULL terminate! */
+ 
+         char* final_msg = NULL;
+         if (!is_enc)

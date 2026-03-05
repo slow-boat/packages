@@ -1,0 +1,376 @@
+Index: dawn-2025.11.07~7414c34a/src/network/tcpsocket.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/network/tcpsocket.c
++++ dawn-2025.11.07~7414c34a/src/network/tcpsocket.c
+@@ -52,8 +52,8 @@ static void client_close(struct ustream
+     struct client *cl = container_of(s, struct client, s.stream);
+ 
+     dawnlog_warning("Connection closed\n");
+-    ustream_free(s);
+     dawn_unregmem(s);
++    ustream_free(s);
+     close(cl->s.fd.fd);
+     list_del(&cl->list);
+     dawn_free(cl);
+@@ -83,8 +83,8 @@ static void client_to_server_close(struc
+     dawnlog_debug_func("Entering...");
+ 
+     dawnlog_warning("Connection to server closed\n");
+-    ustream_free(s);
+     dawn_unregmem(s);
++    ustream_free(s);
+ 
+     close(con->fd.fd);
+     list_del(&con->list);
+@@ -293,8 +293,8 @@ static void client_ping_read_cb(struct u
+             dawnlog_error("Ustream error(" STR_QUOTE(__LINE__) ")!\n");
+             //ERROR HANDLING!
+             if (con->stream.stream.write_error) {
+-                ustream_free(&con->stream.stream);
+                 dawn_unregmem(&con->stream.stream);
++                ustream_free(&con->stream.stream);
+                 close(con->fd.fd);
+                 list_del(&con->list);
+                 dawn_free(con);
+@@ -418,8 +418,8 @@ void send_tcp(char *msg) {
+                     dawnlog_error("Ustream error(" STR_QUOTE(__LINE__) ")!\n");
+                     //ERROR HANDLING!
+                     if (con->stream.stream.write_error) {
+-                        ustream_free(&con->stream.stream);
+                         dawn_unregmem(&con->stream.stream);
++                        ustream_free(&con->stream.stream);
+                         close(con->fd.fd);
+                         list_del(&con->list);
+                         dawn_free(con);
+@@ -455,8 +455,8 @@ void send_tcp(char *msg) {
+                     //ERROR HANDLING!
+                     dawnlog_error("Ustream error(" STR_QUOTE(__LINE__) ")!\n");
+                     if (con->stream.stream.write_error) {
+-                        ustream_free(&con->stream.stream);
+                         dawn_unregmem(&con->stream.stream);
++                        ustream_free(&con->stream.stream);
+                         close(con->fd.fd);
+                         list_del(&con->list);
+                         dawn_free(con);
+@@ -513,8 +513,8 @@ void check_timeout(int timeout) {
+         {
+             if (now - con->time_alive > timeout || now - con->time_alive < -timeout) {
+                 dawnlog_info("Server: close client_to_server connection! timeout=%d\n", (int)(now - con->time_alive));
+-                ustream_free(&con->stream.stream);
+                 dawn_unregmem(&con->stream.stream);
++                ustream_free(&con->stream.stream);
+                 close(con->fd.fd);
+                 list_del(&con->list);
+                 dawn_free(con);
+Index: dawn-2025.11.07~7414c34a/src/storage/datastorage.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/storage/datastorage.c
++++ dawn-2025.11.07~7414c34a/src/storage/datastorage.c
+@@ -1336,8 +1336,8 @@ void insert_macs_from_file() {
+     fclose(fp);
+     if (line)
+     {
++    	dawn_unregmem(line);
+         free(line);
+-        dawn_unregmem(line);
+     }
+ 
+     //exit(EXIT_SUCCESS);
+Index: dawn-2025.11.07~7414c34a/src/utils/dawn_uci.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/utils/dawn_uci.c
++++ dawn-2025.11.07~7414c34a/src/utils/dawn_uci.c
+@@ -37,8 +37,8 @@ void uci_get_hostname(char* hostname)
+     }
+ 
+     if ((uci_lookup_ptr(c, &ptr, path, true) != UCI_OK) || (ptr.o==NULL || ptr.o->v.string==NULL)){
+-        uci_free_context(c);
+         dawn_unregmem(c);
++        uci_free_context(c);
+         return;
+     }
+ 
+@@ -54,8 +54,8 @@ void uci_get_hostname(char* hostname)
+         snprintf(hostname, HOST_NAME_MAX, "%.*s", (int)len, ptr.o->v.string);
+     }
+ 
+-    uci_free_context(c);
+     dawn_unregmem(c);
++    uci_free_context(c);
+ }
+ 
+ 
+@@ -480,8 +480,9 @@ int uci_reset()
+         uci_ctx = ctx;
+     }
+     uci_pkg = uci_lookup_package(ctx, "dawn");
+-    uci_unload(uci_ctx, uci_pkg);
+     dawn_unregmem(uci_pkg);
++    uci_unload(uci_ctx, uci_pkg);
++
+     uci_load(uci_ctx, "dawn", &uci_pkg);
+     dawn_regmem(uci_pkg);
+ 
+@@ -505,8 +506,8 @@ int uci_init() {
+         uci_pkg = uci_lookup_package(ctx, "dawn");
+         if (uci_pkg)
+         {
+-            uci_unload(ctx, uci_pkg);
+             dawn_unregmem(uci_pkg);
++            uci_unload(ctx, uci_pkg);
+             uci_pkg = NULL;
+         }
+     }
+@@ -527,13 +528,13 @@ int uci_clear() {
+         free_neighbor_mac_list(dawn_metric.neighbors[band]);
+ 
+     if (uci_pkg != NULL) {
+-        uci_unload(uci_ctx, uci_pkg);
+         dawn_unregmem(uci_pkg);
++        uci_unload(uci_ctx, uci_pkg);
+         uci_pkg = NULL;
+     }
+     if (uci_ctx != NULL) {
+-        uci_free_context(uci_ctx);
+         dawn_unregmem(uci_ctx);
++        uci_free_context(uci_ctx);
+     }
+     return 1;
+ }
+Index: dawn-2025.11.07~7414c34a/src/utils/ubus.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/utils/ubus.c
++++ dawn-2025.11.07~7414c34a/src/utils/ubus.c
+@@ -701,8 +701,8 @@ int send_blob_attr_via_network(struct bl
+     dawn_free(str);
+     str = NULL;
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     dawn_free(data_str);
+     data_str = NULL;
+@@ -756,8 +756,8 @@ static int hostapd_notify(struct ubus_co
+         ret = handle_beacon_rep(b.head);
+     }
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return ret;
+ }
+@@ -812,8 +812,9 @@ int dawn_init_ubus(const char *ubus_sock
+ 
+     close_socket();
+ 
+-    ubus_free(ctx);
+     dawn_unregmem(ctx);
++    ubus_free(ctx);
++
+     ctx = NULL;
+     uloop_done();
+     return 0;
+@@ -908,8 +909,8 @@ static void ubus_get_clients_cb(struct u
+     print_ap_array();
+     dawn_mutex_unlock(&ap_array_mutex);
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     if (dawn_metric.kicking) {
+         //FIXME: Should we do this?  Does it mix up STA and AP RSSI values, and does that matter?
+@@ -931,8 +932,8 @@ static int ubus_get_clients() {
+             blob_buf_init(&b, 0);
+             dawn_regmem(&b);
+             ubus_invoke(ctx, sub->id, "get_clients", b.head, ubus_get_clients_cb, NULL, timeout * 1000);
+-            blob_buf_free(&b);
+             dawn_unregmem(&b);
++            blob_buf_free(&b);
+         }
+     }
+     return 0;
+@@ -989,8 +990,8 @@ static int ubus_get_rrm() {
+             blob_buf_init(&b, 0);
+             dawn_regmem(&b);
+             ubus_invoke(ctx, sub->id, "rrm_nr_get_own", b.head, ubus_get_rrm_cb, NULL, timeout * 1000);
+-            blob_buf_free(&b);
+             dawn_unregmem(&b);
++            blob_buf_free(&b);
+         }
+     }
+     return 0;
+@@ -1080,8 +1081,8 @@ int ubus_send_beacon_request(client *c,
+     }
+ 
+     int ret = ubus_invoke(ctx, id, "rrm_beacon_req", b.head, NULL, NULL, timeout * 1000);
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return ret;
+ }
+@@ -1206,8 +1207,8 @@ void ubus_set_nr() {
+             dawn_regmem(&b);
+             ap_get_nr(&b, sub->bssid_addr, sub->ssid);
+             ubus_invoke(ctx, sub->id, "rrm_nr_set", b.head, NULL, NULL, timeout * 1000);
+-            blob_buf_free(&b);
+             dawn_unregmem(&b);
++            blob_buf_free(&b);
+         }
+     }
+ }
+@@ -1232,8 +1233,8 @@ void del_client_all_interfaces(const str
+             ubus_invoke(ctx, sub->id, "del_client", b.head, NULL, NULL, timeout * 1000);
+         }
+     }
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ }
+ 
+ void del_client_interface(uint32_t id, const struct dawn_mac client_addr, uint32_t reason, uint8_t deauth, uint32_t ban_time) {
+@@ -1255,8 +1256,8 @@ void del_client_interface(uint32_t id, c
+             ubus_invoke(ctx, id, "del_client", b.head, NULL, NULL, timeout * 1000);
+         }
+     }
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ }
+ 
+ int bss_transition_request(uint32_t id, const struct dawn_mac client_addr, struct kicking_nr* neighbor_list, uint32_t duration) {
+@@ -1293,8 +1294,8 @@ int bss_transition_request(uint32_t id,
+         }
+     }
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1333,8 +1334,8 @@ int wnm_disassoc_imminent(uint32_t id, c
+         }
+     }
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1392,8 +1393,8 @@ int ubus_call_umdns() {
+     dawn_regmem(&b);
+     ubus_invoke(ctx, id, "update", b.head, NULL, NULL, timeout * 1000);
+     ubus_invoke(ctx, id, "browse", b.head, ubus_umdns_cb, NULL, timeout * 1000);
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1437,8 +1438,8 @@ int ubus_send_probe_via_network(struct p
+ 
+     send_blob_attr_via_network(b.head, is_beacon ? "beacon-report" : "probe");
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1455,8 +1456,8 @@ int send_set_probe(struct dawn_mac clien
+ 
+     send_blob_attr_via_network(b.head, "setprobe");
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1560,8 +1561,8 @@ static int reload_config(struct ubus_con
+     if (ret)
+         dawnlog_error("Failed to send reply: %s\n", ubus_strerror(ret));
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1582,8 +1583,8 @@ static int get_hearing_map(struct ubus_c
+     ret = ubus_send_reply(ctx_local, req, b.head);
+     if (ret)
+         dawnlog_error("Failed to send hearing map: %s\n", ubus_strerror(ret));
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1613,8 +1614,8 @@ static int get_network(struct ubus_conte
+     ret = ubus_send_reply(ctx_local, req, b.head);
+     if (ret)
+         dawnlog_error("Failed to send network overview: %s\n", ubus_strerror(ret));
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -1647,8 +1648,8 @@ static void respond_to_notify(uint32_t i
+     if (ret)
+         dawnlog_error("Failed to invoke: %s\n", ubus_strerror(ret));
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ }
+ 
+ static void enable_rrm(uint32_t id) {
+@@ -1665,9 +1666,8 @@ static void enable_rrm(uint32_t id) {
+     ret = ubus_invoke(ctx, id, "bss_mgmt_enable", b.head, NULL, NULL, timeout * 1000);
+     if (ret)
+         dawnlog_error("Failed to invoke: %s\n", ubus_strerror(ret));
+-    
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ }
+ 
+ static void hostapd_handle_remove(struct ubus_context *ctx_local,
+@@ -1921,8 +1921,8 @@ int uci_send_via_network()
+ 
+     send_blob_attr_via_network(b.head, "uci");
+ 
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
+ 
+     return 0;
+ }
+@@ -2314,8 +2314,8 @@ void ubus_set_nr_from_clients(struct kic
+             if (has_content)
+                 ubus_invoke(ctx, sub->id, "rrm_nr_set", b.head, NULL, NULL, timeout * 1000);
+ 
+-            blob_buf_free(&b);
+             dawn_unregmem(&b);
++            blob_buf_free(&b);
+         }
+     }
+ }
+@@ -2369,8 +2369,9 @@ int send_add_mac(struct dawn_mac client_
+     dawn_regmem(&b);
+     blobmsg_add_macaddr(&b, "addr", client_addr);
+     send_blob_attr_via_network(b.head, "addmac");
+-    blob_buf_free(&b);
+     dawn_unregmem(&b);
++    blob_buf_free(&b);
++;
+ 
+     return 0;
+ }

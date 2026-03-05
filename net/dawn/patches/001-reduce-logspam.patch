@@ -30,14 +30,12 @@ Index: dawn-2025.11.07~7414c34a/src/storage/datastorage.c
 ===================================================================
 --- dawn-2025.11.07~7414c34a.orig/src/storage/datastorage.c
 +++ dawn-2025.11.07~7414c34a/src/storage/datastorage.c
-@@ -180,8 +180,8 @@ void send_beacon_requests(ap* target_ap,
-         if (i->rrm_enabled_capa & dawn_metric.rrm_mode_mask)
+@@ -181,7 +181,7 @@ void send_beacon_requests(ap* target_ap,
          {
              int ubus_status = ubus_send_beacon_request(i, target_ap, dawn_metric.duration, sub_id);
--            if (ubus_status) /* change to info since this can happen if devices go offline and we dont want to flood logs */
--                dawnlog_info("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
-+            if (ubus_status)
-+                dawnlog_warning("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
+             if (ubus_status)
+-                dawnlog_warning("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
++                dawnlog_info("Client / BSSID = " MACSTR " / " MACSTR ": BEACON REQUEST failed",
                      MAC2STR(i->client_addr.u8), MAC2STR(target_ap->bssid_addr.u8));
          }
  
