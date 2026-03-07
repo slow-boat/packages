@@ -42,6 +42,7 @@ endef
 define Package/dawn/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/sbin/dawn $(1)/usr/sbin/dawn
+	$(INSTALL_BIN) ./files/dawn-wdog.sh $(1)/usr/sbin/dawn-wdog
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/dawn.init $(1)/etc/init.d/dawn
 	$(INSTALL_DIR) $(1)/etc/config
