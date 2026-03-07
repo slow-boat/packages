@@ -2,6 +2,15 @@ Index: dawn-2025.11.07~7414c34a/src/network/networksocket.c
 ===================================================================
 --- dawn-2025.11.07~7414c34a.orig/src/network/networksocket.c
 +++ dawn-2025.11.07~7414c34a/src/network/networksocket.c
+@@ -15,7 +15,7 @@
+ 
+ 
+ /* Network Defines */
+-#define MAX_RECV_STRING 2048
++#define MAX_RECV_STRING 32768
+ 
+ /* Network Attributes */
+ static int sock;
 @@ -78,6 +78,7 @@ static void* receive_msg_inner(void* arg
          if (recv_string_len == 0) {
              return 0;
@@ -10,3 +19,156 @@ Index: dawn-2025.11.07~7414c34a/src/network/networksocket.c
  
          char* final_msg = NULL;
          if (!is_enc)
+Index: dawn-2025.11.07~7414c34a/src/utils/ubus.c
+===================================================================
+--- dawn-2025.11.07~7414c34a.orig/src/utils/ubus.c
++++ dawn-2025.11.07~7414c34a/src/utils/ubus.c
+@@ -15,7 +15,7 @@
+ #define REQ_TYPE_PROBE 0
+ #define REQ_TYPE_AUTH 1
+ #define REQ_TYPE_ASSOC 2
+-
++#define DAWN_CLIENTS_PER_MSG 5
+ 
+ static struct ubus_context *ctx = NULL;
+ 
+@@ -843,19 +843,17 @@ static void ubus_get_clients_cb(struct u
+     if (!msg)
+         return;
+ 
+-    struct hostapd_sock_entry* entry = NULL;
+-
+-    struct hostapd_sock_entry* sub = NULL;
+-    list_for_each_entry(sub, &hostapd_sock_list, list)
+-    {
++    // Find hostapd entry for this request
++    struct hostapd_sock_entry *entry = NULL;
++    struct hostapd_sock_entry *sub;
++    list_for_each_entry(sub, &hostapd_sock_list, list) {
+         if (sub->id == req->peer) {
+             entry = sub;
++            break;
+         }
+     }
+ 
+-    sub = NULL;
+-
+-    if (entry == NULL) {
++    if (!entry) {
+         dawnlog_error("Failed to find interface!\n");
+         return;
+     }
+@@ -865,42 +863,90 @@ static void ubus_get_clients_cb(struct u
+         return;
+     }
+ 
++    if (entry->band < 0)
++        entry->band = get_band_from_bssid(entry->bssid_addr);
++
++    // Build full message: client data + AP metadata
+     struct blob_buf b = {0};
+     blob_buf_init(&b, 0);
+     dawn_regmem(&b);
+ 
+-    char* data_str = blobmsg_format_json(msg, 1);
++    char *data_str = blobmsg_format_json(msg, 1);
+     dawn_regmem(data_str);
+-
+     blobmsg_add_json_from_string(&b, data_str);
+     dawn_free(data_str);
+-    data_str = NULL;
+ 
+     blobmsg_add_u32(&b, "collision_domain", network_config.collision_domain);
+     blobmsg_add_u32(&b, "bandwidth", network_config.bandwidth);
+-
+     blobmsg_add_macaddr(&b, "bssid", entry->bssid_addr);
+     blobmsg_add_string(&b, "ssid", entry->ssid);
+     blobmsg_add_u8(&b, "ht_supported", entry->ht_support);
+     blobmsg_add_u8(&b, "vht_supported", entry->vht_support);
+-
+-    if (entry->band < 0)
+-        entry->band = get_band_from_bssid(entry->bssid_addr);
+     if (entry->band >= 0)
+         blobmsg_add_u32(&b, "ap_weight", dawn_metric.ap_weight[entry->band]);
+-
+-    //int channel_util = get_channel_utilization(entry->iface_name, &entry->last_channel_time, &entry->last_channel_time_busy);
+     blobmsg_add_u32(&b, "channel_utilization", entry->chan_util_average);
+-
+     blobmsg_add_string(&b, "neighbor_report", entry->neighbor_report);
+-
+     blobmsg_add_string(&b, "iface", entry->iface_name);
+     blobmsg_add_string(&b, "hostname", entry->hostname);
+ 
+-    send_blob_attr_via_network(b.head, "clients");
+-
++    // Process full client list locally
+     parse_to_clients(b.head);
+ 
++    /* Send to peers in chunks- RX limit was hard coded to 2K and busy APs broke the RX side sending >10K packets! */
++    struct blob_attr *clients_attr = NULL;
++    struct blob_attr *cur;
++    int rem;
++    blobmsg_for_each_attr(cur, b.head, rem) {
++        if (blobmsg_type(cur) == BLOBMSG_TYPE_TABLE &&
++            strcmp(blobmsg_name(cur), "clients") == 0) {
++            clients_attr = cur;
++            break;
++        }
++    }
++    if (clients_attr) {
++        struct blob_buf chunk = {0};
++        void *clients_tbl = NULL;
++        int count = 0;
++        struct blob_attr *cur;
++        int rem;
++
++        blobmsg_for_each_attr(cur, clients_attr, rem) {
++            if (count == 0) {
++                blob_buf_init(&chunk, 0);
++                dawn_regmem(&chunk);
++                /* Copy AP metadata into chunk, skipping clients table */
++                struct blob_attr *mc;
++                int mr;
++                blobmsg_for_each_attr(mc, b.head, mr) {
++                    if (strcmp(blobmsg_name(mc), "clients") != 0)
++                        blobmsg_add_field(&chunk, blobmsg_type(mc),
++                            blobmsg_name(mc), blobmsg_data(mc), blobmsg_data_len(mc));
++                }
++                clients_tbl = blobmsg_open_table(&chunk, "clients");
++            }
++
++            blobmsg_add_field(&chunk, blobmsg_type(cur),
++                blobmsg_name(cur), blobmsg_data(cur), blobmsg_data_len(cur));
++
++            if (++count >= DAWN_CLIENTS_PER_MSG) {
++                blobmsg_close_table(&chunk, clients_tbl);
++                send_blob_attr_via_network(chunk.head, "clients");
++                dawn_unregmem(&chunk);
++                blob_buf_free(&chunk);
++                count = 0;
++            }
++        }
++
++        if (count > 0) {
++            blobmsg_close_table(&chunk, clients_tbl);
++            send_blob_attr_via_network(chunk.head, "clients");
++            dawn_unregmem(&chunk);
++            blob_buf_free(&chunk);
++        }
++    } else {
++        send_blob_attr_via_network(b.head, "clients");
++    }
++
+     dawn_mutex_lock(&client_array_mutex);
+     print_client_array();
+     dawn_mutex_unlock(&client_array_mutex);
+@@ -913,9 +959,7 @@ static void ubus_get_clients_cb(struct u
+     blob_buf_free(&b);
+ 
+     if (dawn_metric.kicking) {
+-        //FIXME: Should we do this?  Does it mix up STA and AP RSSI values, and does that matter?
+         update_iw_info(entry->bssid_addr);
+-
+         kick_clients(entry->bssid_addr, req->peer);
+     }
+ }
