@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openvpn
 
 PKG_VERSION:=2.6.14
-PKG_RELEASE:=4
+PKG_RELEASE:=7
 
 PKG_SOURCE_URL:=\
 	https://build.openvpn.net/downloads/releases/ \
@@ -90,57 +90,43 @@ define Build/Configure
 	)
 endef
 
-define Package/openvpn-$(BUILD_VARIANT)/conffiles
-/etc/config/openvpn
-/etc/openvpn.user
-endef
-
 define Package/openvpn-$(BUILD_VARIANT)/install
-	$(INSTALL_DIR) \
-		$(1)/usr/sbin \
-		$(1)/usr/share/openvpn \
-		$(1)/etc/init.d \
-		$(1)/etc/config \
-		$(1)/etc/openvpn \
-		$(1)/lib/functions \
-		$(1)/lib/upgrade/keep.d \
-		$(1)/usr/libexec \
-		$(1)/etc/hotplug.d/openvpn
-
+	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) \
 		$(PKG_INSTALL_DIR)/usr/sbin/openvpn \
 		$(1)/usr/sbin/
 
+	$(INSTALL_DIR) $(1)/lib/netifd/proto
 	$(INSTALL_BIN) \
-		files/openvpn.init \
-		$(1)/etc/init.d/openvpn
+		files/lib/netifd/proto/openvpn.sh \
+		$(1)/lib/netifd/proto/
 
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) \
-		files/usr/libexec/openvpn-hotplug \
-		$(1)/usr/libexec/openvpn-hotplug
+		files/etc/uci-defaults/60_openvpn_migrate.sh \
+		$(1)/etc/uci-defaults/
 
+	$(INSTALL_DIR) $(1)/usr/share/openvpn
 	$(INSTALL_DATA) \
-		files/lib/functions/openvpn.sh \
-		$(1)/lib/functions/openvpn.sh
+		files/usr/share/openvpn/openvpn.options \
+		$(1)/usr/share/openvpn/
+	$(INSTALL_BIN) \
+		files/usr/share/openvpn/up.uc \
+		files/usr/share/openvpn/down.uc \
+		files/usr/share/openvpn/route-pre-down.uc \
+		files/usr/share/openvpn/route-up.uc \
+		files/usr/share/openvpn/ipchange.uc \
+		files/usr/share/openvpn/client-connect.uc \
+		files/usr/share/openvpn/client-disconnect.uc \
+		files/usr/share/openvpn/client-crresponse.uc \
+		files/usr/share/openvpn/auth-user-pass-verify.uc \
+		files/usr/share/openvpn/tls-verify.uc \
+		$(1)/usr/share/openvpn/
 
+	$(INSTALL_DIR) $(1)/lib/upgrade/keep.d
 	$(INSTALL_DATA) \
-		files/etc/hotplug.d/openvpn/01-user \
-		$(1)/etc/hotplug.d/openvpn/01-user
-
-	$(INSTALL_DATA) \
-		files/etc/openvpn.user \
-		$(1)/etc/openvpn.user
-
-	$(INSTALL_DATA) \
-		files/openvpn.options \
-		$(1)/usr/share/openvpn/openvpn.options
-
-	$(INSTALL_CONF) files/openvpn.config \
-		$(1)/etc/config/openvpn
-
-	$(INSTALL_DATA) \
-		files/openvpn.upgrade \
-		$(1)/lib/upgrade/keep.d/openvpn
+		files/lib/upgrade/keep.d/openvpn \
+		$(1)/lib/upgrade/keep.d/
 endef
 
 $(eval $(call BuildPackage,openvpn-openssl))
