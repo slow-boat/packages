@@ -1,4 +1,4 @@
-#
+
 # Copyright (C) 2010-2015 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -9,14 +9,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openvpn
 
-PKG_VERSION:=2.6.14
-PKG_RELEASE:=7
+PKG_VERSION:=2.6.19
+PKG_RELEASE:=1
 
 PKG_SOURCE_URL:=\
 	https://build.openvpn.net/downloads/releases/ \
 	https://swupdate.openvpn.net/community/releases/
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_HASH:=9eb6a6618352f9e7b771a9d38ae1631b5edfeed6d40233e243e602ddf2195e7a
+PKG_HASH:=13702526f687c18b2540c1a3f2e189187baaa65211edcf7ff6772fa69f0536cf
 
 PKG_MAINTAINER:=
 
@@ -90,6 +90,10 @@ define Build/Configure
 	)
 endef
 
+define Package/openvpn-$(BUILD_VARIANT)/conffiles
+/etc/openvpn.user
+endef
+
 define Package/openvpn-$(BUILD_VARIANT)/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) \
@@ -127,6 +131,21 @@ define Package/openvpn-$(BUILD_VARIANT)/install
 	$(INSTALL_DATA) \
 		files/lib/upgrade/keep.d/openvpn \
 		$(1)/lib/upgrade/keep.d/
+
+	$(INSTALL_DIR) $(1)/usr/libexec
+	$(INSTALL_BIN) \
+		files/usr/libexec/openvpn-hotplug \
+		$(1)/usr/libexec/
+
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DATA) \
+		files/etc/openvpn.user \
+		$(1)/etc/
+
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/openvpn
+	$(INSTALL_DATA) \
+		files/etc/hotplug.d/openvpn/01-user \
+		$(1)/etc/hotplug.d/openvpn/
 endef
 
 $(eval $(call BuildPackage,openvpn-openssl))
